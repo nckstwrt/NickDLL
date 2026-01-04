@@ -138,6 +138,7 @@
     <ClCompile Include="CMHeader.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="eng_setup.cpp" />
+    <ClCompile Include="eng_third.cpp" />
     <ClCompile Include="european_cup.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="ita_ser_c1a.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="CMHeader.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="eng_setup.h" />
+    <ClInclude Include="eng_third.h" />
     <ClInclude Include="european_cup.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="ita_ser_c1a.h" />

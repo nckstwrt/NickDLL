@@ -18,6 +18,7 @@
 #include "aus_nsl.h"
 #include "ita_ser_c1a.h"
 #include "eng_setup.h"
+#include "eng_third.h"
 
 using namespace std;
 /*
@@ -56,9 +57,10 @@ void Setup()
 	//setup_sudamericana();
 	setup_european_cup();
 	setup_available_leagues();
-	patch_aus_nsl();
-	patch_ita_ser_c1a();
-	patch_eng_setup();
+	//patch_aus_nsl();
+	//patch_ita_ser_c1a();
+	//patch_eng_setup();
+	patch_eng_third();
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
