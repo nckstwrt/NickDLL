@@ -1,0 +1,150 @@
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4996 4018)
+#include "Helper.h"
+#include <stdio.h>
+#include <conio.h>
+
+char *szDebugFile = "";
+
+void dprintf(const char* fmt, ...)
+{
+	char printString[1024];
+	va_list argp;
+	va_start(argp, fmt);
+	vsprintf(printString, fmt, argp);
+	va_end(argp);
+    
+	// OutputDebugString(printString);
+	printf(printString);
+
+	if ( stricmp(szDebugFile, "") != 0 )
+	{
+		FILE *fout = fopen(szDebugFile, "a+t");
+		if ( fout )
+		{
+			fprintf(fout, printString);
+			fclose(fout);
+		}
+	}
+}
+
+void WriteBytes(DWORD addr, int bytes, ...)
+{
+	va_list valist;
+	va_start(valist, bytes);
+
+	for ( int i = 0; i < bytes; i++ )        
+    {
+        unsigned char b = va_arg(valist, unsigned char);
+
+		DWORD dwOldProt;
+		VirtualProtect((void*)addr, 1, PAGE_EXECUTE_READWRITE, &dwOldProt);
+		*((BYTE*)addr) = b;
+		VirtualProtect((void*)addr, 1, dwOldProt, NULL);
+
+		addr++;
+    }
+	va_end(valist);
+}
+
+void WriteDWORD(DWORD addr, DWORD data)
+{
+	DWORD dwOldProt;
+	VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &dwOldProt);
+	*((DWORD*)addr) = data;
+	VirtualProtect((void*)addr, 4, dwOldProt, NULL);
+}
+
+void PatchFunction(DWORD addr, DWORD jmpTo)
+{
+	DWORD relAddr = (jmpTo - addr) - 5;
+	WriteBytes(addr, 1, 0xE9);
+	WriteDWORD(addr + 1, relAddr);
+}
+
+int GetKey()
+{
+	printf("Press any key...");
+	return getch();
+}
+
+cm3_nations *find_country(const char *szCountry)
+{
+	for (int i = 0; i < *nations_count; i++)
+	{
+		if (stricmp((*nations)[i].NationName, szCountry) == 0)
+			return &(*nations)[i];
+	}
+	return NULL;
+}
+
+cm3_clubs *find_club(const char *szClub)
+{
+	for (int i = 0; i < *clubs_count; i++)
+	{
+		if (stricmp((*clubs)[i].ClubName, szClub) == 0)
+			return &(*clubs)[i];
+	}
+	return NULL;
+}
+
+cm3_club_comps *find_club_comp(const char *szClubComp)
+{
+	for (int i = 0; i < *club_comps_count; i++)
+	{
+		if (stricmp((*club_comps)[i].ClubCompName, szClubComp) == 0)
+			return &(*club_comps)[i];
+	}
+	return NULL;
+}
+
+vector<cm3_club_comps*> find_club_comps_of_nation(const char *szNation)
+{
+	vector<cm3_club_comps*> ret;
+
+	cm3_nations* nation = find_country(szNation);
+	if (nation)
+	{
+		for (int i = 0; i < *club_comps_count; i++)
+		{
+			if ((*club_comps)[i].ClubCompNation == nation)
+				ret.push_back(&(*club_comps)[i]);
+		}
+	}
+
+	return ret;
+}
+
+vector<cm3_clubs*> find_clubs_of_country(DWORD nation_id)
+{
+	vector<cm3_clubs*> ret;
+	for (int i = 0; i < *clubs_count; i++)
+	{
+		if ((*clubs)[i].ClubNation != NULL && (*clubs)[i].ClubNation->NationID == nation_id && (*clubs)[i].ClubDivision != 0)  // ClubDivision != 0 to stop us getting the national teams
+		{
+			cm3_clubs* club = &(*clubs)[i];
+
+			dprintf("Club Division: %s\n", (char *)(club->ClubDivision+1));
+
+			// Don't add Lower Division Clubs
+			if (stricmp((char *)(club->ClubDivision+1), "A Lower Division") != 0)
+				ret.push_back(club);
+		}
+	}
+	return ret;
+}
+
+bool vector_contains_club(vector<cm3_clubs*> &vec, cm3_clubs* club)
+{
+	for (int i = 0; i < vec.size(); i++)
+	{
+		if (vec[i] == club)
+			return true;
+	}
+	return false;
+}
+
+bool compareClubRep(cm3_clubs* c1, cm3_clubs* c2)
+{
+    return (c1->ClubReputation > c2->ClubReputation);
+}
