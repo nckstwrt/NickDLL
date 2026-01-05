@@ -5,6 +5,7 @@
 #include "CMHeader.h"
 #include "Helper.h"
 #include "vtable.h"
+#include "generic_functions.h"
 
 static int(*sub_48C6D0)() = (int(*)())(0x48C6D0);
 static int(*sub_49EE70)() = (int(*)())(0x49EE70);
@@ -17,8 +18,6 @@ static int(*sub_51C800)() = (int(*)())(0x51C800);
 static int(*sub_521E60)() = (int(*)())(0x521E60);
 static int(*sub_521EB0)() = (int(*)())(0x521EB0);
 static int(*sub_522E00)() = (int(*)())(0x522E00);
-static int(*sub_549F70)() = (int(*)())(0x549F70);
-static int(*sub_5783C0)() = (int(*)())(0x5783C0);
 static int(*sub_5E8290)() = (int(*)())(0x5E8290);
 static int(*sub_66F4E0)() = (int(*)())(0x66F4E0);
 static int(*sub_682200)() = (int(*)())(0x682200);
@@ -48,22 +47,35 @@ static int(*sub_944CFF)() = (int(*)())(0x944CFF);
 static int(*sub_944E46)() = (int(*)())(0x944E46);
 static int(*sub_9452CA)() = (int(*)())(0x9452CA);  // Free?
 
-static int   (*sub_944C9F_sprintf)() = (int(*)())(0x944C9F);
-static void* (*sub_944CF1_operator_new)(int size) = (void* (*)(int size))(0x944CF1);
-static int   (*sub_944CFF_splitpath)() = (int(*)())(0x944CFF);
-static void* (*sub_944E46_malloc)(int size) = (void* (*)(int size))(0x944E46);
-static void* (*sub_945501_alloc)(int size, int a2) = (void* (*)(int size, int a2))(0x945501);
-
 void sub_577020();
-void sub_577F70();
-void sub_5780C0();
+void sub_577F70_add_teams();
+void sub_5780C0_set_subs();
+int __fastcall sub_5780C0_set_subs_c(BYTE* _this);		// We cheat with a fastcall here (as the one and only param will be passed as ecx). It's really a __thiscall.
 void sub_577000();
 void sub_578170();
 void sub_578330();
-void sub_5770E0();
+void sub_5770E0_add_fixtures();
 void sub_576C50();
+void sub_5783C0();
 void sub_5785B0();
 void sub_578660();
+
+void __declspec(naked) eng_fixture_caller()
+{
+	__asm
+	{
+		//jmp sub_5770E0_add_fixtures
+		mov eax, esp
+		push dword ptr[eax + 0x10]
+		push dword ptr[eax + 0xC]
+		push dword ptr[eax + 0x8]
+		push dword ptr[eax + 0x4]
+		push ecx
+		call add_eng_24team_fixtures_with_playoffs
+		add esp, 0x14
+		ret 0x10
+	}
+}
 
 /*
 eng_third VTable at 00969E84:
@@ -83,7 +95,7 @@ eng_third VTable at 00969E84:
 */
 
 // Normally at: 0x969E84
-vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, (DWORD)&sub_578330, 0x684640, (DWORD)&sub_5770E0/*fixture_caller*/, (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0, 0x5788C0, 0x579610);
+vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, (DWORD)&sub_578330, 0x684640, (DWORD)&/*sub_5770E0_add_fixtures*/eng_fixture_caller, (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, 0x5788C0, 0x579610);
 
 void __declspec(naked) sub_576C50()
 {
@@ -247,12 +259,7 @@ void __declspec(naked) sub_576DD0()
 {
 	__asm
 	{
-	/*00576DD0*/	push 0xFFFFFFFF
-	/*00576DD2*/	push 0x958489		/*push cm0102.958489*/
-	/*00576DD7*/	mov eax,dword ptr fs:[0x0]
-	/*00576DDD*/	push eax
-	/*00576DDE*/	mov dword ptr fs:[0x0],esp
-	/*00576DE5*/	sub esp,0x208
+	/*00576DE5*/	sub esp,0x214
 	/*00576DEB*/	push ebx
 	/*00576DEC*/	push esi
 	/*00576DED*/	mov esi,ecx
@@ -283,12 +290,12 @@ void __declspec(naked) sub_576DD0()
 	/*00576E47*/	push 0x4
 	/*00576E49*/	mov byte ptr ds:[esi+0x44],al
 	/*00576E4C*/	mov dword ptr ds:[esi+0x30],eax
-	/*00576E4F*/	mov dword ptr ds:[esi+0x2C],0x1
+	/*00576E4F*/	mov dword ptr ds:[esi+0x2C],0x1							// <---- Number of fixture schedule sections (1)
 	/*00576E56*/	call sub_944E46_malloc		/*call cm0102.944E46*/
 	/*00576E5B*/	add esp,0x4
 	/*00576E5E*/	mov ecx,esi
 	/*00576E60*/	mov dword ptr ds:[esi+0xC],eax
-	/*00576E63*/	call sub_5780C0		/*call cm0102.5780C0*/
+	/*00576E63*/	call sub_5780C0_set_subs		/*call cm0102.5780C0*/
 	/*00576E68*/	test eax,eax
 	/*00576E6A*/	jne _00576E9C
 	/*00576E6C*/	lea edx,dword ptr ss:[esp+0x10]
@@ -308,7 +315,12 @@ void __declspec(naked) sub_576DD0()
 	/*00576E97*/	jmp _00576FAC
 _00576E9C:
 	/*00576E9C*/	mov ecx,esi
-	/*00576E9E*/	call sub_577F70		/*call cm0102.577F70*/
+	/*00576E9E*/	// call sub_577F70_add_teams		/*call cm0102.577F70*/
+					
+					push ecx
+					call add_teams
+					add esp, 0x4
+
 	/*00576EA3*/	test eax,eax
 	/*00576EA5*/	jne _00576ED6
 	/*00576EA7*/	lea eax,dword ptr ss:[esp+0x110]
@@ -417,17 +429,15 @@ _00576FDC:
 	/*00576FDC*/	mov ecx,esi
 	/*00576FDE*/	call sub_68A850		/*call cm0102.68A850*/
 _00576FE3:
-	/*00576FE3*/	mov ecx,dword ptr ss:[esp+0x210]
 	/*00576FEA*/	mov eax,esi
 	/*00576FEC*/	pop esi
 	/*00576FED*/	pop ebx
-	/*00576FEE*/	mov dword ptr fs:[0x0],ecx
 	/*00576FF5*/	add esp,0x214
 	/*00576FFB*/	ret 0x8
 	}
 }
 
-void __declspec(naked) sub_577000()
+void __declspec(naked) sub_577000()			// Not sure when called, if ever?
 {
 	__asm
 	{
@@ -446,15 +456,11 @@ _00577018:
 	}
 }
 
-void __declspec(naked) sub_577020()
+void __declspec(naked) sub_577020()			// Not sure when called, if ever?
 {
 	__asm
 	{
-	/*00577020*/	push 0xFFFFFFFF
-	/*00577022*/	push 0x9584A8		/*push cm0102.9584A8*/
-	/*00577027*/	mov eax,dword ptr fs:[0x0]
 	/*0057702D*/	push eax
-	/*0057702E*/	mov dword ptr fs:[0x0],esp
 	/*00577035*/	push ecx
 	/*00577036*/	push esi
 	/*00577037*/	mov esi,ecx
@@ -516,16 +522,14 @@ _005770BF:
 	/*005770BF*/	mov ecx,esi
 	/*005770C1*/	mov dword ptr ss:[esp+0x14],0xFFFFFFFF
 	/*005770C9*/	call sub_682300		/*call cm0102.682300*/
-	/*005770CE*/	mov ecx,dword ptr ss:[esp+0xC]
 	/*005770D2*/	pop edi
 	/*005770D3*/	pop esi
-	/*005770D4*/	mov dword ptr fs:[0x0],ecx
 	/*005770DB*/	add esp,0x10
 	/*005770DE*/	ret
 	}
 }
 
-void __declspec(naked) sub_5770E0()
+void __declspec(naked) sub_5770E0_add_fixtures()
 {
 	__asm
 	{
@@ -1034,7 +1038,7 @@ _00577165:
 	/*00577532*/	push edx
 	/*00577533*/	push 0xB
 	/*00577535*/	push 0x1
-	/*00577537*/	call sub_549F70		/*call cm0102.549F70*/
+	/*00577537*/	call sub_549F70_convert_to_cm_date		/*call cm0102.549F70*/
 	/*0057753C*/	mov cx,word ptr ds:[esi+0x596]
 	/*00577543*/	sub cx,word ptr ds:[eax]
 	/*00577546*/	inc ecx
@@ -2150,7 +2154,7 @@ _00577E37:
 	}
 }
 
-void __declspec(naked) sub_577F70()
+void __declspec(naked) sub_577F70_add_teams()			// Now unused
 {
 	__asm
 	{
@@ -2210,7 +2214,7 @@ _00578014:
 	/*00578017*/	test eax,eax
 	/*00578019*/	je _00578041
 	/*0057801B*/	mov ecx,dword ptr ds:[eax]
-	/*0057801D*/	mov eax,dword ptr ds:[0x9CF5C8]
+	/*0057801D*/	mov eax,dword ptr ds:[0x9CF5C8]				// [9cf5c8] = English Third Division
 	/*00578022*/	cmp ecx,eax
 	/*00578024*/	jne _00578041
 	/*00578026*/	push 0x0
@@ -2267,7 +2271,40 @@ _0057809B:
 	}
 }
 
-void __declspec(naked) sub_5780C0()
+int __fastcall sub_5780C0_set_subs_c(BYTE* _this)
+{
+	*(WORD*)(_this + 0x3C) = 2;
+	_this[0xC2] = 3;
+	_this[0xC3] = 1;
+	_this[0xC4] = 2;
+	_this[0x42] = 1;
+	_this[0xC5] = 1;
+	_this[0xC6] = 2;
+	_this[0xC7] = 3;
+	_this[0xBE] = 3;		// Promotion Places
+	_this[0xBF] = 4;		// Play off places
+	_this[0xC0] = 0;		// Relegation Play off places
+	_this[0xC1] = 1;		// Relegation places
+	
+	*((DWORD*)_this + 7) = *(DWORD*)0x9CF5C4;			// [9cf5c4] = English Second Division
+	
+	if ((*(BYTE*)(*(DWORD*)(*((DWORD*)_this + 1) + 93) + 284) & 4) != 0)		// If conference selected
+		*((DWORD*)_this + 8) = *(DWORD*)0x9CF69C;		// [9cf69c] = English Conference
+	else
+		*((DWORD*)_this + 8) = -1;
+
+	_this[0x52] = 2;
+	_this[0x4A] = 3;		// Subs Used
+	_this[0x49] = 5;		// Subs Named
+
+	//call vtable +3C which is actually add fixtures function
+	DWORD v1 = *(DWORD*)_this;
+	*(DWORD*)(_this + 0xBA) = (*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0xA9, _this + 0x3A, 0);		// Fixtures saved to 0xBA
+	
+	return 1;
+}
+
+void __declspec(naked) sub_5780C0_set_subs()
 {
 	__asm
 	{
@@ -2279,41 +2316,41 @@ void __declspec(naked) sub_5780C0()
 	/*005780CB*/	mov ebx,0x1
 	/*005780D0*/	mov dl,0x4
 	/*005780D2*/	push edi
-	/*005780D3*/	mov word ptr ds:[esi+0x3C],cx
-	/*005780D7*/	mov byte ptr ds:[esi+0xC2],al
-	/*005780DD*/	mov byte ptr ds:[esi+0xC3],bl
-	/*005780E3*/	mov byte ptr ds:[esi+0xC4],cl
-	/*005780E9*/	mov byte ptr ds:[esi+0x42],bl
-	/*005780EC*/	mov byte ptr ds:[esi+0xC5],bl
-	/*005780F2*/	mov byte ptr ds:[esi+0xC6],cl
-	/*005780F8*/	mov byte ptr ds:[esi+0xC7],al
-	/*005780FE*/	mov byte ptr ds:[esi+0xBE],al
-	/*00578104*/	mov byte ptr ds:[esi+0xBF],dl
-	/*0057810A*/	mov byte ptr ds:[esi+0xC0],0x0
-	/*00578111*/	mov byte ptr ds:[esi+0xC1],bl
-	/*00578117*/	mov edi,dword ptr ds:[0x9CF5C4]
-	/*0057811D*/	mov dword ptr ds:[esi+0x1C],edi
+	/*005780D3*/	mov word ptr ds:[esi+0x3C],cx		// 2
+	/*005780D7*/	mov byte ptr ds:[esi+0xC2],al		// 3
+	/*005780DD*/	mov byte ptr ds:[esi+0xC3],bl		// 1
+	/*005780E3*/	mov byte ptr ds:[esi+0xC4],cl		// 2
+	/*005780E9*/	mov byte ptr ds:[esi+0x42],bl		// 1
+	/*005780EC*/	mov byte ptr ds:[esi+0xC5],bl		// 1
+	/*005780F2*/	mov byte ptr ds:[esi+0xC6],cl		// 2
+	/*005780F8*/	mov byte ptr ds:[esi+0xC7],al		// 3
+	/*005780FE*/	mov byte ptr ds:[esi+0xBE],3		// 3		// Promotion places
+	/*00578104*/	mov byte ptr ds:[esi+0xBF],4		// 4		// Play off places
+	/*0057810A*/	mov byte ptr ds:[esi+0xC0],0x0					
+	/*00578111*/	mov byte ptr ds:[esi+0xC1],1		// 1		// Relegation Places
+	/*00578117*/	mov edi,dword ptr ds:[0x9CF5C4]					// [9cf5c4] = English Second Division
+	/*0057811D*/	mov dword ptr ds:[esi+0x1C],edi					// +0x1C Promotion location
 	/*00578120*/	mov edi,dword ptr ds:[esi+0x4]
 	/*00578123*/	mov edi,dword ptr ds:[edi+0x5D]
 	/*00578126*/	test byte ptr ds:[edi+0x11C],dl
 	/*0057812C*/	je _00578139
-	/*0057812E*/	mov edx,dword ptr ds:[0x9CF69C]
-	/*00578134*/	mov dword ptr ds:[esi+0x20],edx
+	/*0057812E*/	mov edx,dword ptr ds:[0x9CF69C]					// [9cf69c] = English Conference
+	/*00578134*/	mov dword ptr ds:[esi+0x20],edx					// +0x20 Relegation location
 	/*00578137*/	jmp _00578140
 _00578139:
 	/*00578139*/	mov dword ptr ds:[esi+0x20],0xFFFFFFFF
 _00578140:
-	/*00578140*/	mov byte ptr ds:[esi+0x52],cl
+	/*00578140*/	mov byte ptr ds:[esi+0x52],cl		// 2
 	/*00578143*/	lea ecx,dword ptr ds:[esi+0x3A]
 	/*00578146*/	push 0x0
 	/*00578148*/	lea edx,dword ptr ds:[esi+0xA9]
-	/*0057814E*/	mov byte ptr ds:[esi+0x4A],al
+	/*0057814E*/	mov byte ptr ds:[esi+0x4A],al		// 3 // Subs Used
 	/*00578151*/	mov eax,dword ptr ds:[esi]
 	/*00578153*/	push ecx
 	/*00578154*/	push edx
 	/*00578155*/	push 0xFFFFFFFF
 	/*00578157*/	mov ecx,esi
-	/*00578159*/	mov byte ptr ds:[esi+0x49],0x5
+	/*00578159*/	mov byte ptr ds:[esi+0x49],0x5		// Subs Named
 	/*0057815D*/	call dword ptr ds:[eax+0x3C]
 	/*00578160*/	mov dword ptr ds:[esi+0xBA],eax
 	/*00578166*/	pop edi
@@ -2393,7 +2430,12 @@ _005781CE:
 	/*00578215*/	jmp _005782C9
 _0057821A:
 	/*0057821A*/	mov ecx,esi
-	/*0057821C*/	call sub_577F70		/*call cm0102.577F70*/
+	/*0057821C*/	//call sub_577F70_add_teams		/*call cm0102.577F70*/
+					
+					push ecx
+					call add_teams
+					add esp, 0x4
+
 	/*00578221*/	test eax,eax
 	/*00578223*/	jne _00578255
 	/*00578225*/	lea edx,dword ptr ss:[esp+0x108]
@@ -2531,13 +2573,12 @@ _005783AB:
 _005783B8:
 	/*005783B8*/	add esp,0x200
 	/*005783BE*/	ret
-	/*005783BF*/	nop
-	/*005783C0*/	mov eax,dword ptr fs:[0x0]
-	/*005783C6*/	push 0xFFFFFFFF
-	/*005783C8*/	push 0x9584CE		/*push cm0102.9584CE*/
-	/*005783CD*/	push eax
-	/*005783CE*/	mov dword ptr fs:[0x0],esp
-	/*005783D5*/	sub esp,0x40C
+	}
+}
+void __declspec(naked) sub_5783C0()
+{
+	__asm {
+	/*005783D5*/	sub esp,0x418
 	/*005783DB*/	push esi
 	/*005783DC*/	mov esi,ecx
 	/*005783DE*/	push edi
@@ -2662,17 +2703,13 @@ _00578539:
 	/*00578562*/	mov dword ptr ds:[0xB67A34],0x0
 	/*0057856C*/	pop edi
 	/*0057856D*/	pop esi
-	/*0057856E*/	mov ecx,dword ptr ss:[esp+0x40C]
-	/*00578575*/	mov dword ptr fs:[0x0],ecx
 	/*0057857C*/	add esp,0x418
 	/*00578582*/	ret
 _00578583:
 	/*00578583*/	push 0x0
 	/*00578585*/	call sub_51C800		/*call cm0102.51C800*/
-	/*0057858A*/	mov ecx,dword ptr ss:[esp+0x414]
 	/*00578591*/	pop edi
 	/*00578592*/	pop esi
-	/*00578593*/	mov dword ptr fs:[0x0],ecx
 	/*0057859A*/	add esp,0x418
 	/*005785A0*/	ret
 	}

@@ -19,6 +19,7 @@
 #include "ita_ser_c1a.h"
 #include "eng_setup.h"
 #include "eng_third.h"
+#include "Date.h"
 
 using namespace std;
 /*
@@ -52,6 +53,9 @@ void Setup()
 
 	// Ignore Player Histories On Load for quick loading while debugging
 	WriteBytes(0x7C02A1, 5, 0xe9, 0x30, 0xa, 0, 0, 90);
+
+	// Allow multiple CM0102 instances
+	WriteBytes(0x68D3B6, 1, 0xEB);
 #endif 
 
 	//setup_sudamericana();
@@ -61,6 +65,20 @@ void Setup()
 	//patch_ita_ser_c1a();
 	//patch_eng_setup();
 	patch_eng_third();
+
+	BYTE date_bytes[] = { 0x4E, 0x01, 0xD1, 0x07 };
+	Date date(date_bytes);
+
+	date.print();
+	date.ToBytes(date_bytes, false);
+	dprintf("%02X %02X %02X %02X\n", date_bytes[0], date_bytes[1], date_bytes[2], date_bytes[3]);
+
+	Date date2(2026, 1, 5);
+	date2.print("date2");
+	Date date3(2026, 1, 10);
+	date3.print("date3");
+	Date date4(2026, 1, 11);
+	date4.print("date4");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)

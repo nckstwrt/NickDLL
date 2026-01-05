@@ -21,3 +21,4 @@ vector<cm3_club_comps*> find_club_comps_of_nation(const char *szNation);
 vector<cm3_clubs*> find_clubs_of_country(DWORD nation_id);
 bool vector_contains_club(vector<cm3_clubs*> &vec, cm3_clubs* club);
 bool compareClubRep(cm3_clubs* c1, cm3_clubs* c2);
+int CountNumberOfTeamsInComp(DWORD CompID);

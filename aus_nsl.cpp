@@ -5,6 +5,8 @@
 #include "CMHeader.h"
 #include "Helper.h"
 #include "vtable.h"
+#include "generic_functions.h"
+
 /*
 Aus NSL VTable at 00967768:
 0. 00 = 004110C0
@@ -21,11 +23,7 @@ Aus NSL VTable at 00967768:
 11. B4 = 00412680
 12. B8 = 00412AC0
 */
-static void* (*sub_944E46_malloc)(int size) = (void* (*)(int size))(0x944E46);
-static void* (*sub_944CF1_operator_new)(int size) = (void* (*)(int size))(0x944CF1);
-static int(*sub_944CFF_splitpath)() = (int(*)())(0x944CFF);
-static void* (*sub_945501_alloc)(int size, int a2) = (void* (*)(int size, int a2))(0x945501);
-static int(*sub_944C9F_sprintf)() = (int(*)())(0x944C9F);
+
 
 static int(*sub_682200)() = (int(*)())(0x682200);
 static int(*sub_687B10)() = (int(*)())(0x687B10);
@@ -105,31 +103,7 @@ static int(__thiscall* sub_6827D0_call)(BYTE* _this, int a1) = (int(__thiscall*)
 static int(__thiscall* sub_49EE70_call)(void* a1, BYTE* _this) = (int(__thiscall*)(void* a1, BYTE * _this))(0x49EE70);
 static int(__thiscall* sub_411CE0_subs_call)(BYTE* _this) = (int(__thiscall*)(BYTE * _this))(&sub_411CE0_subs);
 static int(__thiscall* sub_411B70_add_teams_call)(BYTE* _this) = (int(__thiscall*)(BYTE * _this))(&sub_411B70_add_teams);
-static int(__thiscall* sub_687430_call)(BYTE* _this, BYTE teamNo, cm3_clubs* club, BYTE a3, DWORD* a4) = (int(__thiscall*)(BYTE * _this, BYTE teamNo, cm3_clubs * club, BYTE a3, DWORD * a4))(0x687430);
 
-int add_teams(BYTE* _this)
-{
-	DWORD CompID = *(DWORD*)(*(DWORD*)(_this + 0x4));
-	// Count the number of teams first, as the code really expects us to know up front
-	BYTE numberOfLeagueTeams = 0;
-	for (DWORD i = 0; i < *clubs_count; i++)
-	{
-		cm3_clubs* club = &(*clubs)[i];
-		if (club->ClubDivision && club->ClubDivision->ClubCompID == CompID)
-			numberOfLeagueTeams++;
-	}
-	// Now let's add the teams
-	*((WORD*)(_this + 0x3E)) = numberOfLeagueTeams; // number of teams
-	*((DWORD*)(_this + 0xB1)) = (DWORD)sub_944E46_malloc(numberOfLeagueTeams * 59); // number of teams * 59 (0x3B) - was 0x2FF
-	BYTE teamsAdded = 0;
-	for (DWORD i = 0; i < *clubs_count; i++)
-	{
-		cm3_clubs* club = &(*clubs)[i];
-		if (club->ClubDivision && club->ClubDivision->ClubCompID == CompID)
-			sub_687430_call(_this, teamsAdded++, club, 0, 0);
-	}
-	return 1;
-}
 
 // ecx = 18DB1F78  C0 00 33 03 10 FD DA 18 00 00 00 00 00 00 00 00  À.3..ýÚ.........  
 

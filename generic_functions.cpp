@@ -1,0 +1,212 @@
+#include <Windows.h>
+#include "generic_functions.h"
+#include "CMHeader.h"
+#include "Helper.h"
+#include "Date.h"
+
+int add_teams(BYTE* _this)
+{
+	DWORD CompID = *(DWORD*)(*(DWORD*)(_this + 0x4));
+
+	// Count the number of teams first, as the code really expects us to know up front
+	BYTE numberOfLeagueTeams = (BYTE)CountNumberOfTeamsInComp(CompID);
+
+	// Now let's add the teams
+	*((WORD*)(_this + 0x3E)) = numberOfLeagueTeams; // number of teams
+	*((DWORD*)(_this + 0xB1)) = (DWORD)sub_944E46_malloc(numberOfLeagueTeams * 59); // number of teams * 59 (0x3B) - was 0x2FF
+	BYTE teamsAdded = 0;
+	for (DWORD i = 0; i < *clubs_count; i++)
+	{
+		cm3_clubs* club = &(*clubs)[i];
+		if (club->ClubDivision && club->ClubDivision->ClubCompID == CompID)
+			sub_687430_add_team_call(_this, teamsAdded++, club, 0, 0);
+	}
+	return 1;
+}
+
+void AddFixture(BYTE *pMem, int fixture, Date date, int startYear, Day dayOfWeek /* Mon = 0 */, int timeOfDay = 1)
+{
+	sub_68A160_add_fixture_call(pMem, fixture, date.getDay(), date.getMonth() - 1, date.getYear() - startYear, dayOfWeek, timeOfDay, startYear, 0);
+	sub_68A1C0_add_fixture_call(pMem, fixture, 0, -1, -1, -1, 0);
+}
+
+DWORD add_eng_24team_fixtures_with_playoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
+{
+	dprintf("add_eng_24team_fixtures_with_playoffs called with this=%08X a2=%02X, a3=%08X, a4=%08X, a5=%08X\n", _this, a2, a3, a4, a5);
+
+	DWORD CompID = *(DWORD*)*((DWORD*)(_this + 4));
+	const char *szCompName = (const char *)(*((DWORD*)(_this + 4))+4);
+	int team_count = CountNumberOfTeamsInComp(CompID);
+	dprintf("CompID: %08X Name: %s Team Count: %d\n", CompID, szCompName, team_count);
+
+	if (a2 == 0xFF)	// -1
+	{
+		if (a5)
+			*a5 = 1;
+		*a3 = (24 - 1) * 2;		// Number of Fixtures = 0x22 (34 i.e. (number of teams - 1) * 2) 18 in ser c1/a (23 in nothern prem) (eng third: 24)
+		*a4 = 0;
+		BYTE* pMem = (BYTE*)sub_944E46_malloc((*a3) * 65);	// Allocate memory for fixtures
+		WORD year = *(WORD*)(_this + 0x40);
+
+		int fixture = 0;
+
+		AddFixture(pMem, fixture++, Date(year, 8, 12), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 8, 19), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 8, 26), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 8, 28), year, Monday, 2);
+		AddFixture(pMem, fixture++, Date(year, 9, 2), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 9, 9), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 9, 13), year, Wednesday, 2);
+		AddFixture(pMem, fixture++, Date(year, 9, 16), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 9, 23), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 9, 30), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 10, 7), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 10, 14), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 10, 17), year, Tuesday, 2);
+		AddFixture(pMem, fixture++, Date(year, 10, 21), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 10, 24), year, Tuesday, 2);
+		AddFixture(pMem, fixture++, Date(year, 10, 28), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 11, 4), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 11, 11), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 11, 18), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 11, 25), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 12, 2), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 12, 9), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year, 12, 16), year, Saturday);
+
+		Date FirstDec(year, 12, 1);
+		Date Dec16(year, 12, 16);
+		int dayDiff = Dec16.DayOfYear() - FirstDec.DayOfYear();
+
+		dprintf("dayDiff: %d\n", dayDiff);
+		switch (dayDiff)
+		{
+		case 12:
+			AddFixture(pMem, fixture++, Date(year, 12, 20), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 27), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 30), year, DontCare, 2);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 3), year, DontCare);
+			break;
+		case 13:
+			AddFixture(pMem, fixture++, Date(year, 12, 21), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 26), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 28), year, DontCare, 2);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 1), year, DontCare);
+			break;
+		case 14:
+			AddFixture(pMem, fixture++, Date(year, 12, 22), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 26), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 29), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 1), year, DontCare);
+			break;
+		case 15:
+			AddFixture(pMem, fixture++, Date(year, 12, 23), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 26), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 30), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 1), year, DontCare);
+			break;
+		case 16:
+			AddFixture(pMem, fixture++, Date(year, 12, 21), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 26), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 31), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 4), year, DontCare);
+			break;
+		case 17:
+			AddFixture(pMem, fixture++, Date(year, 12, 22), year, DontCare, 2);
+			AddFixture(pMem, fixture++, Date(year, 12, 26), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 28), year, DontCare, 2);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 4), year, DontCare);
+			break;
+		default:
+		case 18:
+			if (dayDiff != 18)
+				dprintf("SOMETHING WENT WRONG WITH DAY DIFF!!!\n");
+			AddFixture(pMem, fixture++, Date(year, 12, 26), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year, 12, 28), year, DontCare, 2);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 2), year, DontCare);
+			AddFixture(pMem, fixture++, Date(year + 1, 1, 5), year, DontCare);
+			break;
+		}
+
+		AddFixture(pMem, fixture++, Date(year + 1, 1, 12), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 1, 20), year, Saturday);
+
+		AddFixture(pMem, fixture++, Date(year + 1, 2, 3), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 2, 10), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 2, 17), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 2, 20), year, Tuesday, 2);
+		AddFixture(pMem, fixture++, Date(year + 1, 2, 24), year, Saturday);
+
+		AddFixture(pMem, fixture++, Date(year + 1, 3, 3), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 3, 7), year, Tuesday, 2);
+		AddFixture(pMem, fixture++, Date(year + 1, 3, 10), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 3, 17), year, Monday, 2);
+		AddFixture(pMem, fixture++, Date(year + 1, 3, 24), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 3, 31), year, Saturday);
+
+		AddFixture(pMem, fixture++, Date(year + 1, 4, 7), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 4, 14), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 4, 16), year, Monday, 2);
+		AddFixture(pMem, fixture++, Date(year + 1, 4, 21), year, Saturday);
+		AddFixture(pMem, fixture++, Date(year + 1, 4, 28), year, Saturday);
+
+		AddFixture(pMem, fixture++, Date(year + 1, 5, 4), year, Sunday);
+
+		dprintf("fixtures added: %d\n", fixture - 1);
+
+		return (DWORD)pMem;
+	}
+	else
+	{
+		if (a2 != 0)
+			return 0;
+		if (a5)
+			*a5 = 0;
+		*a3 = 2;
+		*a4 = 160;
+
+		BYTE *pMem = (BYTE*)malloc(104 * 2);
+		WORD year = *(WORD*)(_this + 0x40);
+
+		sub_521E60_add_playoff_fixture_call(pMem, 0, 7, 4, 1, 0, year);
+		sub_521EB0_add_playoff_fixture_call(pMem, 0, 12, 4, 1, 5, 1, year, 0);
+		*(WORD*)(pMem + 7) = 130;
+		*(WORD*)(pMem + 9) = 0;
+		*(WORD*)(pMem + 11) = 0;
+		*(WORD*)(pMem + 13) = 516;
+		*(BYTE*)(pMem + 23) = 5;
+		*((WORD*)pMem + 12) = 4;
+		*(WORD*)(pMem + 26) = 2;
+		*(WORD*)(pMem + 28) = 4;
+		*(WORD*)(pMem + 15) = 3;
+		*(WORD*)(pMem + 30) = 0;
+		*(BYTE*)(pMem + 32) = 0;
+		*(BYTE*)(pMem + 33) = 2;
+		*(BYTE*)(pMem + 34) = 4;
+		*((DWORD*)pMem + 23) = 0;
+		*((DWORD*)pMem + 24) = 0;
+		*((DWORD*)pMem + 25) = 0;
+
+		sub_521E60_add_playoff_fixture_call(pMem, 1, 17, 4, 1, 3, year);
+		sub_521EB0_add_playoff_fixture_call(pMem, 1, 26, 4, 1, 5, 1, year, 4);
+		*(WORD*)(pMem + 113) = 1;
+		*(WORD*)(pMem + 130) = 1;
+		*(WORD*)(pMem + 111) = 150;
+		*(WORD*)(pMem + 115) = 0;
+		*(WORD*)(pMem + 117) = 3;
+		*(BYTE*)(pMem + 127) = 5;
+		*(WORD*)(pMem + 128) = 2;
+		*(WORD*)(pMem + 132) = 0;
+		*(WORD*)(pMem + 119) = 0;
+		*(WORD*)(pMem + 134) = 0;
+		*(BYTE*)(pMem + 136) = 0;
+		*(BYTE*)(pMem + 137) = 1;
+		*(BYTE*)(pMem + 138) = 0;
+		*((DWORD*)pMem + 49) = 0;
+		*((DWORD*)pMem + 50) = 0;
+		*((DWORD*)pMem + 51) = 0;
+
+		return (DWORD)pMem;
+	}
+	return 0;
+}

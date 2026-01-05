@@ -2,9 +2,11 @@
 #include <windows.h>
 #include <stdio.h>
 #include <conio.h>
+#include "generic_functions.h"
 #include "CMHeader.h"
 #include "Helper.h"
 #include "vtable.h"
+#include "Date.h"
 
 static int(*sub_49EE70)() = (int(*)())(0x49EE70);
 static int(*sub_49F450)() = (int(*)())(0x49F450);
@@ -35,12 +37,6 @@ static int(*sub_68AFF0)() = (int(*)())(0x68AFF0);
 
 static int(*sub_79CEE0)() = (int(*)())(0x79CEE0);
 static int(*sub_90D130)() = (int(*)())(0x90D130);
-
-static void* (*sub_944E46_malloc)(int size)			= (void* (*)(int size))(0x944E46);
-static int   (*sub_944C9F_sprintf)()				= (int(*)())(0x944C9F);
-static void* (*sub_944CF1_operator_new)(int size)	= (void* (*)(int size))(0x944CF1);
-static int   (*sub_944CFF_splitpath)()				= (int(*)())(0x944CFF);
-static void* (*sub_945501_alloc)(int size, int a2)	= (void* (*)(int size, int a2))(0x945501);
 
 static int(*sub_9452CA)() = (int(*)())(0x9452CA);
 static int(*sub_9462BB)() = (int(*)())(0x9462BB);
@@ -387,99 +383,6 @@ _0064AD54:
 	}
 }
 
-static int(__cdecl* sub_68A160_call)(BYTE* a1, __int16 a2, __int16 a3, unsigned __int8 a4, __int16 a5, int a6, char a7, __int16 a8, int a9) = (int(__cdecl*)(BYTE * a1, __int16 a2, __int16 a3, unsigned __int8 a4, __int16 a5, int a6, char a7, __int16 a8, int a9))(0x68A160);
-static int(__cdecl* sub_68A1C0_call)(BYTE* a1, __int16 a2, unsigned __int16 a3, __int16 a4, char a5, char a6, int a7) = (int(__cdecl*)(BYTE * a1, __int16 a2, unsigned __int16 a3, __int16 a4, char a5, char a6, int a7))(0x68A1C0);
-
-class Date 
-{
-private:
-	int year;
-	int month; // 1-12
-	int day;   // 1-31
-
-	static bool isLeapYear(int y) 
-	{
-		return (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0);
-	}
-
-	static int daysInMonth(int y, int m) 
-	{
-		static const int days[12] = {
-			31, 28, 31, 30, 31, 30,
-			31, 31, 30, 31, 30, 31
-		};
-
-		if (m == 2 && isLeapYear(y))
-			return 29;
-
-		return days[m - 1];
-	}
-
-	void normalize() {
-		// Normalize day forward
-		while (day > daysInMonth(year, month)) 
-		{
-			day -= daysInMonth(year, month);
-			month++;
-			if (month > 12) {
-				month = 1;
-				year++;
-			}
-		}
-
-		// Normalize day backward
-		while (day < 1) 
-		{
-			month--;
-			if (month < 1) {
-				month = 12;
-				year--;
-			}
-			day += daysInMonth(year, month);
-		}
-	}
-
-public:
-	Date(int y = 1970, int m = 1, int d = 1)
-		: year(y), month(m), day(d) 
-	{
-		normalize();
-	}
-
-	// Getters
-	int getYear() const { return year; }
-	int getMonth() const { return month; }
-	int getDay() const { return day; }
-
-	// Setters
-	void setYear(int y) 
-	{
-		year = y;
-		normalize();
-	}
-
-	void setMonth(int m) 
-	{
-		if (m < 1) m = 1;
-		if (m > 12) m = 12;
-		month = m;
-		normalize();
-	}
-
-	void setDay(int d) 
-	{
-		day = d;
-		normalize();
-	}
-
-	// Add days (can be negative)
-	void addDays(int days) 
-	{
-		day += days;
-		normalize();
-	}
-};
-
 DWORD add_fixtures(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
 {
 	dprintf("add_fixtures called with this=%08X a2=%02X, a3=%08X, a4=%08X, a5=%08X\n", _this, a2, a3, a4, a5);
@@ -498,8 +401,8 @@ DWORD add_fixtures(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
 		for (int i = 0; i < (*a3); i++)
 		{
 			//sub_68A160_call(pMem, i, 5 /* Day */, 8 /* Month - 1 */, 0 /* add to year */, 6, 1, year, 0);
-			sub_68A160_call(pMem, i, date.getDay(), date.getMonth() -1 /* Month - 1 */, date.getYear() - year /* add to year */, 6 /* day of week - 1 */, 1, year, 0);
-			sub_68A1C0_call(pMem, i, 0, -1, -1, -1, 0);
+			sub_68A160_add_fixture_call(pMem, i, date.getDay(), date.getMonth() -1 /* Month - 1 */, date.getYear() - year /* add to year */, 6 /* day of week - 1 */, 1, year, 0);
+			sub_68A1C0_add_fixture_call(pMem, i, 0, -1, -1, -1, 0);
 			date.addDays(7); // Next fixture in 7 days	
 		}
 		return (DWORD)pMem;

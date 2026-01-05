@@ -37,10 +37,10 @@ void WriteBytes(DWORD addr, int bytes, ...)
     {
         unsigned char b = va_arg(valist, unsigned char);
 
-		DWORD dwOldProt;
+		DWORD dwOldProt, dwOldProt2;
 		VirtualProtect((void*)addr, 1, PAGE_EXECUTE_READWRITE, &dwOldProt);
 		*((BYTE*)addr) = b;
-		VirtualProtect((void*)addr, 1, dwOldProt, NULL);
+		VirtualProtect((void*)addr, 1, dwOldProt, &dwOldProt2);
 
 		addr++;
     }
@@ -49,10 +49,10 @@ void WriteBytes(DWORD addr, int bytes, ...)
 
 void WriteDWORD(DWORD addr, DWORD data)
 {
-	DWORD dwOldProt;
+	DWORD dwOldProt, dwOldProt2;
 	VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &dwOldProt);
 	*((DWORD*)addr) = data;
-	VirtualProtect((void*)addr, 4, dwOldProt, NULL);
+	VirtualProtect((void*)addr, 4, dwOldProt, &dwOldProt2);
 }
 
 void PatchFunction(DWORD addr, DWORD jmpTo)
@@ -147,4 +147,16 @@ bool vector_contains_club(vector<cm3_clubs*> &vec, cm3_clubs* club)
 bool compareClubRep(cm3_clubs* c1, cm3_clubs* c2)
 {
     return (c1->ClubReputation > c2->ClubReputation);
+}
+
+int CountNumberOfTeamsInComp(DWORD CompID)
+{
+	int numberOfLeagueTeams = 0;
+	for (DWORD i = 0; i < *clubs_count; i++)
+	{
+		cm3_clubs* club = &(*clubs)[i];
+		if (club->ClubDivision && club->ClubDivision->ClubCompID == CompID)
+			numberOfLeagueTeams++;
+	}
+	return numberOfLeagueTeams;
 }
