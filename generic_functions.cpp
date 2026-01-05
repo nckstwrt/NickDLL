@@ -4,7 +4,7 @@
 #include "Helper.h"
 #include "Date.h"
 
-int add_teams(BYTE* _this)
+int AddTeams(BYTE* _this)
 {
 	DWORD CompID = *(DWORD*)(*(DWORD*)(_this + 0x4));
 
@@ -24,13 +24,31 @@ int add_teams(BYTE* _this)
 	return 1;
 }
 
+
+typedef BYTE*(__thiscall*league_init_typedef)(BYTE* _this, __int16 a2, cm3_club_comps* a3);
+void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DWORD league_init_addr)
+{
+	dprintf("Adding (This: %08X) league %s at slot %d for year %d (calling init addr: %08X).\n", (DWORD)_this, szLeagueName, leagueNo, (short)year, league_init_addr);
+	cm3_club_comps* comp = find_club_comp(szLeagueName);
+	if (comp)
+	{
+		BYTE* ee_bytes = (BYTE*)sub_944CF1_operator_new(0xEE);
+		league_init_typedef init_call = (league_init_typedef)(league_init_addr);
+		BYTE* leagueSetupPtr = init_call(ee_bytes, (short)*current_year, comp);
+		DWORD* compPtrTable = *(DWORD**)(_this + 0x10);
+		compPtrTable[leagueNo] = (DWORD)leagueSetupPtr;
+	}
+	else
+		dprintf("Could not find comp %s!", szLeagueName);
+}
+
 void AddFixture(BYTE *pMem, int fixture, Date date, int startYear, Day dayOfWeek /* Mon = 0 */, int timeOfDay = 1)
 {
 	sub_68A160_add_fixture_call(pMem, fixture, date.getDay(), date.getMonth() - 1, date.getYear() - startYear, dayOfWeek, timeOfDay, startYear, 0);
 	sub_68A1C0_add_fixture_call(pMem, fixture, 0, -1, -1, -1, 0);
 }
 
-DWORD add_eng_24team_fixtures_with_playoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
+DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
 {
 	dprintf("add_eng_24team_fixtures_with_playoffs called with this=%08X a2=%02X, a3=%08X, a4=%08X, a5=%08X\n", _this, a2, a3, a4, a5);
 

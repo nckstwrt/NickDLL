@@ -19,5 +19,6 @@ static void* (*sub_945501_alloc)(int size, int a2) = (void* (*)(int size, int a2
 
 static int(__thiscall* sub_687430_add_team_call)(BYTE* _this, BYTE teamNo, cm3_clubs* club, BYTE a3, DWORD* a4) = (int(__thiscall*)(BYTE * _this, BYTE teamNo, cm3_clubs * club, BYTE a3, DWORD * a4))(0x687430);
 
-int add_teams(BYTE* _this);
-DWORD add_eng_24team_fixtures_with_playoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5);
+int AddTeams(BYTE* _this);
+void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DWORD league_init_addr);
+DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5);

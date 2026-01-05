@@ -60,18 +60,18 @@ void sub_5783C0();
 void sub_5785B0();
 void sub_578660();
 
-void __declspec(naked) eng_fixture_caller()
+void __declspec(naked) eng_fixture_caller()		// used as a __thiscall -> __cdecl converter
 {
 	__asm
 	{
-		//jmp sub_5770E0_add_fixtures
+		//jmp sub_5770E0_add_fixtures			// For testing
 		mov eax, esp
 		push dword ptr[eax + 0x10]
 		push dword ptr[eax + 0xC]
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call add_eng_24team_fixtures_with_playoffs
+		call AddEng24TeamFixturesWithPlayoffs
 		add esp, 0x14
 		ret 0x10
 	}
@@ -255,7 +255,7 @@ _00576DC7:
 	}
 }
 
-void __declspec(naked) sub_576DD0()
+void __declspec(naked) sub_576DD0_eng_third_init()
 {
 	__asm
 	{
@@ -318,7 +318,7 @@ _00576E9C:
 	/*00576E9E*/	// call sub_577F70_add_teams		/*call cm0102.577F70*/
 					
 					push ecx
-					call add_teams
+					call AddTeams
 					add esp, 0x4
 
 	/*00576EA3*/	test eax,eax
@@ -2433,7 +2433,7 @@ _0057821A:
 	/*0057821C*/	//call sub_577F70_add_teams		/*call cm0102.577F70*/
 					
 					push ecx
-					call add_teams
+					call AddTeams
 					add esp, 0x4
 
 	/*00578221*/	test eax,eax
@@ -2910,5 +2910,5 @@ _00578762:
 void patch_eng_third()
 {
 	vtable::PrintVTable(0x969E84, "eng_third");
-	PatchFunction(0x576DD0, (DWORD)&sub_576DD0);
+	PatchFunction(0x576DD0, (DWORD)&sub_576DD0_eng_third_init);
 }

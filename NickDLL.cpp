@@ -63,7 +63,7 @@ void Setup()
 	setup_available_leagues();
 	//patch_aus_nsl();
 	//patch_ita_ser_c1a();
-	//patch_eng_setup();
+	patch_eng_setup();
 	patch_eng_third();
 
 	BYTE date_bytes[] = { 0x4E, 0x01, 0xD1, 0x07 };

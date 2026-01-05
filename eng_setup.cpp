@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include "CMHeader.h"
+#include "generic_functions.h"
 #include "Helper.h"
 #include "vtable.h"
 
@@ -21,51 +22,12 @@ static int(*sub_5E8290)() = (int(*)())(0x5E8290);
 static int(*sub_66F4E0)() = (int(*)())(0x66F4E0);
 static int(*sub_90D130)() = (int(*)())(0x90D130);
 
-static int   (*sub_944C9F_sprintf)()				= (int(*)())(0x944C9F);
-static void* (*sub_944CF1_operator_new)(int size)	= (void* (*)(int size))(0x944CF1);
-static int   (*sub_944CFF_splitpath)()				= (int(*)())(0x944CFF);
-static void* (*sub_945501_alloc)(int size, int a2)	= (void* (*)(int size, int a2))(0x945501);
-
-const char* szEnglisNorthernPremierDivision = "English Northern Premier League Premier Division";
+const char* szEnglishNorthernPremierDivision = "English Northern Premier League Premier Division";
 const char* szItalianSerieC1A = "Italian Serie C1/A";
 const char* szDanishPremierDivision = "Danish Premier Division";
 
 void sub_64AA70(); // ita_ser_c1a init
-
-BYTE* league_init_caller(BYTE* ee_bytes, short year, cm3_club_comps* comp, DWORD league_init_addr)
-{
-	BYTE* leaguePtr;
-	__asm
-	{
-		pushad
-		mov edx, dword ptr[comp]
-		mov ebx, dword ptr[year]
-		mov ecx, dword ptr[ee_bytes]
-		mov eax, dword ptr[league_init_addr]
-		push edx
-		push ebx
-		call eax
-		mov dword ptr[leaguePtr], eax
-		popad
-	}
-	return leaguePtr;
-}
-
-void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DWORD league_init_addr)
-{
-	dprintf("Adding (This: %08X) league %s at slot %d for year %d (calling init addr: %08X).\n", (DWORD)_this, szLeagueName, leagueNo, (short)year, league_init_addr);
-	cm3_club_comps* comp = find_club_comp(szLeagueName);
-	if (comp)
-	{
-		BYTE* ee_bytes = (BYTE*)sub_944CF1_operator_new(0xEE);
-		BYTE* leagueSetupPtr = league_init_caller(ee_bytes, (short)*current_year, comp, league_init_addr);
-		//league_init_caller(
-		DWORD* compPtrTable = *(DWORD**)(_this + 0x10);
-		compPtrTable[leagueNo] = (DWORD)leagueSetupPtr;
-	}
-	else
-		dprintf("Could not find comp %s!", szLeagueName);
-}
+void sub_576DD0_eng_third_init();
 
 void __declspec(naked) sub_833750()
 {
@@ -328,11 +290,11 @@ _00833AAF_AllGood:
 
 					pushad
 					movsx ebx, bl
-					push sub_64AA70							// league init function
-					push ebp								// has the year in it
-					push ebx								// league number
-					push szEnglisNorthernPremierDivision // szEnglisNorthernPremierDivision // szDanishPremierDivision   //szItalianSerieC1A // //szEnglisNorthernPremierDivision	// league name
-					push esi								// this pointer
+					push sub_576DD0_eng_third_init // sub_64AA70	// league init function
+					push ebp										// has the year in it
+					push ebx										// league number
+					push szEnglishNorthernPremierDivision			// szEnglishNorthernPremierDivision // szDanishPremierDivision   //szItalianSerieC1A // //szEnglishNorthernPremierDivision	// league name
+					push esi										// this pointer
 					call AddLeague
 					add esp, 0x14
 					popad

@@ -130,7 +130,7 @@ BYTE* __stdcall sub_410E90_init_c(BYTE *_this, short year, cm3_club_comps *club_
 		*((DWORD*)(_this + 0xC)) = (DWORD)Bytes8;
 		sub_411CE0_subs_call(_this);
 		//sub_411B70_add_teams_call(_this);
-		add_teams(_this);
+		AddTeams(_this);
 		sub_6835C0_call(_this);
 		sub_6827D0_call(_this, 0);
 		void *Bytes5CE = sub_944CF1_operator_new(0x5CE);
@@ -2224,7 +2224,7 @@ _00411E60:
 	/*00411E60*/	// mov ecx,esi
 	/*00411E62*/	// call sub_411B70		/*call <cm0102.sub_411B70>*/				/// Add Teams ?
 					push esi
-					call add_teams
+					call AddTeams
 					add esp, 0x4
 
 	/*00411E67*/	test eax,eax

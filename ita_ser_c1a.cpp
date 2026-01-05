@@ -96,7 +96,7 @@ void sub_64AD80_fixtures();
 void sub_64BD80();
 void sub_64B9E0();
 
-int add_teams(BYTE* _this);
+int AddTeams(BYTE* _this);
 void fixture_caller();
 
 vtable vtable_ita_ser_c1a((DWORD)&sub_64ACA0, (DWORD)&sub_64B820, (DWORD)&sub_64B9E0, 0x684640, (DWORD)&fixture_caller/*sub_64AD80_fixtures*/, 0x654180, 0x654390, 0x48E180, (DWORD)&sub_64BD80, 0x48F2D0, (DWORD)&sub_64B770, 0x64EE50, 0x685D30);
@@ -167,7 +167,7 @@ _0064AB2A:
 	// /*0064AB2C*/	call sub_64B670_add_teams		/*call <cm0102.sub_64B670_add_teams>*/
 
 					push ecx
-					call add_teams
+					call AddTeams
 					add esp,0x4
 
 	/*0064AB31*/	test eax,eax
@@ -1602,7 +1602,7 @@ _0064B8CA:
 	/*0064B8CA*/	mov ecx,esi
 	///*0064B8CC*/	call sub_64B670_add_teams		/*call <cm0102.sub_64B670_add_teams>*/
 					push ecx
-					call add_teams
+					call AddTeams
 					add esp, 0x4
 
 	/*0064B8D1*/	test eax,eax
