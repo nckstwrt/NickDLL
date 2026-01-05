@@ -1,4 +1,5 @@
 #pragma warning(disable : 4773)	// warning C4733: Inline asm assigning to 'FS:0': handler not registered as safe handler
+#define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
 #include <stdio.h>
 #include <conio.h>
@@ -96,6 +97,7 @@ eng_third VTable at 00969E84:
 
 // Normally at: 0x969E84
 vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, (DWORD)&sub_578330, 0x684640, (DWORD)&/*sub_5770E0_add_fixtures*/eng_fixture_caller, (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, 0x5788C0, 0x579610);
+DWORD SecondDivisionCompID, ThirdDivisionCompID, ConferenceDivisionCompID, NorthernConferenceDivisionCompID, SouthernConferenceDivisionCompID;
 
 void __declspec(naked) sub_576C50()
 {
@@ -255,10 +257,31 @@ _00576DC7:
 	}
 }
 
+void eng_third_init_additional()
+{
+	SecondDivisionCompID = find_club_comp_id("English Second Division");
+	ThirdDivisionCompID = find_club_comp_id("English Third Division");
+	ConferenceDivisionCompID = find_club_comp_id("English Conference");
+	NorthernConferenceDivisionCompID = find_club_comp_id("English Northern Premier League Premier Division");
+	SouthernConferenceDivisionCompID = find_club_comp_id("English Southern League Premier Division");
+
+	if (NorthernConferenceDivisionCompID != -1L)		// If the Northern league is missing a short acronym add one
+	{
+		if (_stricmp((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "") == 0)
+			strcpy((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "NLN");
+	}
+
+	dprintf("SecondDivisionCompID = %02X ThirdDivisionCompID = %02X ConferenceDivisionCompID = %02X NorthernConferenceDivisionCompID = %02X SouthernConferenceDivisionCompID = %02X\n", SecondDivisionCompID, ThirdDivisionCompID, ConferenceDivisionCompID, NorthernConferenceDivisionCompID, SouthernConferenceDivisionCompID);
+}
+
 void __declspec(naked) sub_576DD0_eng_third_init()
 {
 	__asm
 	{
+					pushad
+					call eng_third_init_additional
+					popad
+
 	/*00576DE5*/	sub esp,0x214
 	/*00576DEB*/	push ebx
 	/*00576DEC*/	push esi
@@ -295,7 +318,7 @@ void __declspec(naked) sub_576DD0_eng_third_init()
 	/*00576E5B*/	add esp,0x4
 	/*00576E5E*/	mov ecx,esi
 	/*00576E60*/	mov dword ptr ds:[esi+0xC],eax
-	/*00576E63*/	call sub_5780C0_set_subs		/*call cm0102.5780C0*/
+	/*00576E63*/	call sub_5780C0_set_subs_c		/*call cm0102.5780C0*/
 	/*00576E68*/	test eax,eax
 	/*00576E6A*/	jne _00576E9C
 	/*00576E6C*/	lea edx,dword ptr ss:[esp+0x10]
@@ -2273,6 +2296,9 @@ _0057809B:
 
 int __fastcall sub_5780C0_set_subs_c(BYTE* _this)
 {
+	DWORD CompID = *(DWORD*)*((DWORD*)(_this + 4));
+	dprintf("sub_5780C0_set_subs_c - CompID: %08X\n", CompID);
+
 	*(WORD*)(_this + 0x3C) = 2;
 	_this[0xC2] = 3;
 	_this[0xC3] = 1;
@@ -2285,13 +2311,51 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)
 	_this[0xBF] = 4;		// Play off places
 	_this[0xC0] = 0;		// Relegation Play off places
 	_this[0xC1] = 1;		// Relegation places
-	
-	*((DWORD*)_this + 7) = *(DWORD*)0x9CF5C4;			// [9cf5c4] = English Second Division
-	
-	if ((*(BYTE*)(*(DWORD*)(*((DWORD*)_this + 1) + 93) + 284) & 4) != 0)		// If conference selected
-		*((DWORD*)_this + 8) = *(DWORD*)0x9CF69C;		// [9cf69c] = English Conference
-	else
-		*((DWORD*)_this + 8) = -1;
+
+	*(DWORD*)(_this + 0x1C) = -1L;		// Promotion League
+	*(DWORD*)(_this + 0x20) = -1L;		// Relegation League
+
+	bool includingConference = ((*(BYTE*)(*(DWORD*)(*((DWORD*)_this + 1) + 93) + 284) & 4) != 0);
+
+	if (CompID == ThirdDivisionCompID)
+	{
+		_this[0xBE] = 3;		// Promotion Places
+		_this[0xBF] = 4;		// Play off places
+		_this[0xC1] = 1;		// Relegation places
+
+		*(DWORD*)(_this + 0x1C) = SecondDivisionCompID;
+		*(DWORD*)(_this + 0x20) = includingConference ? ConferenceDivisionCompID : -1L;
+	}
+
+	if (CompID == ConferenceDivisionCompID)
+	{
+		_this[0xBE] = 1;		// Promotion Places
+		_this[0xBF] = 6;		// Play off places
+		_this[0xC1] = 4;		// Relegation places
+
+		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
+		*(DWORD*)(_this + 0x20) = -1L;
+	}
+
+	if (CompID == NorthernConferenceDivisionCompID)
+	{
+		_this[0xBE] = 1;		// Promotion Places
+		_this[0xBF] = 6;		// Play off places
+		_this[0xC1] = 4;		// Relegation places
+
+		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
+		*(DWORD*)(_this + 0x20) = -1L;
+	}
+
+	if (CompID == SouthernConferenceDivisionCompID)
+	{
+		_this[0xBE] = 1;		// Promotion Places
+		_this[0xBF] = 6;		// Play off places
+		_this[0xC1] = 4;		// Relegation places
+
+		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
+		*(DWORD*)(_this + 0x20) = -1L;
+	}
 
 	_this[0x52] = 2;
 	_this[0x4A] = 3;		// Subs Used

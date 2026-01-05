@@ -98,6 +98,17 @@ cm3_club_comps *find_club_comp(const char *szClubComp)
 	return NULL;
 }
 
+DWORD find_club_comp_id(const char* szClubComp, const char* szClubCompAlternative)
+{
+	DWORD CompID = -1L;
+	cm3_club_comps* comp = find_club_comp(szClubComp);
+	if (!comp && szClubCompAlternative)
+		comp = find_club_comp(szClubCompAlternative);
+	if (comp)
+		CompID = comp->ClubCompID;
+	return CompID;
+}
+
 vector<cm3_club_comps*> find_club_comps_of_nation(const char *szNation)
 {
 	vector<cm3_club_comps*> ret;

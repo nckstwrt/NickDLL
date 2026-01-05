@@ -22,23 +22,16 @@
 #include "Date.h"
 
 using namespace std;
-/*
-typedef BOOL(WINAPI *AttachConsole_typedef)(DWORD dwProcessId);
-typedef HWND(WINAPI *GetConsoleWindow_typedef)(void);
-#define ATTACH_PARENT_PROCESS ((DWORD)-1)
-*/
+
 void Setup()
 {
 	srand((unsigned int)time(NULL)); 
 
 #ifdef _DEBUG
-	// 
 	szDebugFile = "c:\\nicklog.txt";
 	DeleteFile(szDebugFile);
 
 	// All the below is just to force the console window visible in x64dbg
-	//AttachConsole_typedef AttachConsole = (AttachConsole_typedef)GetProcAddress(LoadLibrary("Kernel32.DLL"), "AttachConsole");
-	//GetConsoleWindow_typedef GetConsoleWindow = (GetConsoleWindow_typedef)GetProcAddress(LoadLibrary("Kernel32.DLL"), "GetConsoleWindow");
 	if (!AttachConsole(ATTACH_PARENT_PROCESS))
 		AllocConsole();
 	HWND hCon = GetConsoleWindow();
@@ -66,6 +59,8 @@ void Setup()
 	patch_eng_setup();
 	patch_eng_third();
 
+	/*
+	Date Testing
 	BYTE date_bytes[] = { 0x4E, 0x01, 0xD1, 0x07 };
 	Date date(date_bytes);
 
@@ -79,6 +74,7 @@ void Setup()
 	date3.print("date3");
 	Date date4(2026, 1, 11);
 	date4.print("date4");
+	*/
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)

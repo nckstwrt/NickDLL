@@ -176,53 +176,124 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 	}
 	else
 	{
+		BYTE playOffPlaces = _this[0xBF];
+		dprintf("Playoff Places: %d\n", playOffPlaces);
+
 		if (a2 != 0)
 			return 0;
 		if (a5)
 			*a5 = 0;
-		*a3 = 2;
-		*a4 = 160;
 
-		BYTE *pMem = (BYTE*)malloc(104 * 2);
+		BYTE* pMem = NULL;
 		WORD year = *(WORD*)(_this + 0x40);
 
-		sub_521E60_add_playoff_fixture_call(pMem, 0, 7, 4, 1, 0, year);
-		sub_521EB0_add_playoff_fixture_call(pMem, 0, 12, 4, 1, 5, 1, year, 0);
-		*(WORD*)(pMem + 7) = 130;
-		*(WORD*)(pMem + 9) = 0;
-		*(WORD*)(pMem + 11) = 0;
-		*(WORD*)(pMem + 13) = 516;
-		*(BYTE*)(pMem + 23) = 5;
-		*((WORD*)pMem + 12) = 4;
-		*(WORD*)(pMem + 26) = 2;
-		*(WORD*)(pMem + 28) = 4;
-		*(WORD*)(pMem + 15) = 3;
-		*(WORD*)(pMem + 30) = 0;
-		*(BYTE*)(pMem + 32) = 0;
-		*(BYTE*)(pMem + 33) = 2;
-		*(BYTE*)(pMem + 34) = 4;
-		*((DWORD*)pMem + 23) = 0;
-		*((DWORD*)pMem + 24) = 0;
-		*((DWORD*)pMem + 25) = 0;
+		if (playOffPlaces == 4)
+		{
+			*a3 = 2;
+			*a4 = 160;
 
-		sub_521E60_add_playoff_fixture_call(pMem, 1, 17, 4, 1, 3, year);
-		sub_521EB0_add_playoff_fixture_call(pMem, 1, 26, 4, 1, 5, 1, year, 4);
-		*(WORD*)(pMem + 113) = 1;
-		*(WORD*)(pMem + 130) = 1;
-		*(WORD*)(pMem + 111) = 150;
-		*(WORD*)(pMem + 115) = 0;
-		*(WORD*)(pMem + 117) = 3;
-		*(BYTE*)(pMem + 127) = 5;
-		*(WORD*)(pMem + 128) = 2;
-		*(WORD*)(pMem + 132) = 0;
-		*(WORD*)(pMem + 119) = 0;
-		*(WORD*)(pMem + 134) = 0;
-		*(BYTE*)(pMem + 136) = 0;
-		*(BYTE*)(pMem + 137) = 1;
-		*(BYTE*)(pMem + 138) = 0;
-		*((DWORD*)pMem + 49) = 0;
-		*((DWORD*)pMem + 50) = 0;
-		*((DWORD*)pMem + 51) = 0;
+			pMem = (BYTE*)sub_944E46_malloc(104 * (*a3));
+
+			sub_521E60_add_playoff_fixture_call(pMem, 0, 7, 4, 1, 0, year);
+			sub_521EB0_add_playoff_fixture_call(pMem, 0, 12, 4, 1, 5, 1, year, 0);
+			*(WORD*)(pMem + 0x7) = 0x82;		
+			*(WORD*)(pMem + 0x9) = 0x0;
+			*(WORD*)(pMem + 0xB) = 0x0;
+			*(WORD*)(pMem + 0xD) = 0x204;		
+			*(BYTE*)(pMem + 0x17) = 0x5;
+			*((WORD*)pMem + 0xC) = 0x4;
+			*(WORD*)(pMem + 0x1A) = 0x2;
+			*(WORD*)(pMem + 0x1C) = 0x4;
+			*(WORD*)(pMem + 0xF) = 0x3;
+			*(WORD*)(pMem + 0x1E) = 0x0;
+			*(BYTE*)(pMem + 0x20) = 0x0;
+			*(BYTE*)(pMem + 0x21) = 0x2;		
+			*(BYTE*)(pMem + 0x22) = 0x4;
+			*((DWORD*)pMem + 0x17) = 0x0;
+			*((DWORD*)pMem + 0x18) = 0x0;
+			*((DWORD*)pMem + 0x19) = 0x0;
+
+			sub_521E60_add_playoff_fixture_call(pMem, 1, 17, 4, 1, 3, year);
+			sub_521EB0_add_playoff_fixture_call(pMem, 1, 26, 4, 1, 5, 1, year, 4);
+			*(WORD*)(pMem + 113) = 1;
+			*(WORD*)(pMem + 130) = 1;
+			*(WORD*)(pMem + 111) = 150;
+			*(WORD*)(pMem + 115) = 0;
+			*(WORD*)(pMem + 117) = 3;
+			*(BYTE*)(pMem + 127) = 5;
+			*(WORD*)(pMem + 128) = 2;
+			*(WORD*)(pMem + 132) = 0;
+			*(WORD*)(pMem + 119) = 0;
+			*(WORD*)(pMem + 134) = 0;
+			*(BYTE*)(pMem + 136) = 0;
+			*(BYTE*)(pMem + 137) = 1;
+			*(BYTE*)(pMem + 138) = 0;
+			*((DWORD*)pMem + 49) = 0;
+			*((DWORD*)pMem + 50) = 0;
+			*((DWORD*)pMem + 51) = 0;
+		}
+
+		if (playOffPlaces == 6)
+		{
+			*a3 = 3;
+			*a4 = 160;
+			pMem = (BYTE*)sub_944E46_malloc(104 * (*a3));
+
+			sub_521E60_add_playoff_fixture_call(pMem, 0, 3, 4, 1, 0, year);
+			sub_521EB0_add_playoff_fixture_call(pMem, 0, 5, 4, 1, 2, 2, year, 0);
+			*(WORD*)(pMem + 7) = 120;
+			*(WORD*)(pMem + 9) = 0;
+			*(WORD*)(pMem + 11) = 0;
+			*(WORD*)(pMem + 13) = 515;
+			pMem[23] = 5;
+			*((WORD*)pMem + 12) = 4;
+			*((WORD*)pMem + 13) = 2;
+			*((WORD*)pMem + 14) = 4;
+			*(WORD*)(pMem + 15) = 3;
+			*((WORD*)pMem + 15) = 0;
+			pMem[32] = 0;
+			pMem[33] = 1;
+			pMem[34] = 4;
+			*((DWORD*)pMem + 23) = 0;
+			*((DWORD*)pMem + 24) = 0;
+			*((DWORD*)pMem + 25) = 0;
+
+			sub_521E60_add_playoff_fixture_call(pMem, 1, 6, 4, 1, 3, year);
+			sub_521EB0_add_playoff_fixture_call(pMem, 1, 8, 4, 1, 5, 1, year, 0);
+			*(WORD*)(pMem + 111) = 130;
+			*(WORD*)(pMem + 113) = 1;
+			*(WORD*)(pMem + 115) = 0;
+			*(WORD*)(pMem + 117) = 1027;
+			pMem[127] = 5;
+			*((WORD*)pMem + 64) = 4;
+			*((WORD*)pMem + 65) = 2;
+			*((WORD*)pMem + 66) = 2;
+			*(WORD*)(pMem + 119) = 3;
+			*((WORD*)pMem + 67) = 4;
+			*(DWORD*)(pMem + 135) = 16842752;
+			*((DWORD*)pMem + 49) = 0;
+			*((DWORD*)pMem + 50) = 0;
+			*((DWORD*)pMem + 51) = 0;
+
+			sub_521E60_add_playoff_fixture_call(pMem, 2, 9, 4, 1, 6, year);
+			sub_521EB0_add_playoff_fixture_call(pMem, 2, 15, 4, 1, 5, 1, year, 4);
+			*(WORD*)(pMem + 217) = 2;
+			*((WORD*)pMem + 116) = 2;
+			*((WORD*)pMem + 117) = 1;
+			*((WORD*)pMem + 118) = 0;
+			*(WORD*)(pMem + 215) = 150;
+			*(WORD*)(pMem + 219) = 0;
+			*(WORD*)(pMem + 221) = 3;
+			pMem[231] = 5;
+			*(WORD*)(pMem + 223) = 0;
+			*((WORD*)pMem + 119) = 6;
+			pMem[240] = 0;
+			pMem[241] = 1;
+			pMem[242] = 0;
+			*((DWORD*)pMem + 75) = 0;
+			*((DWORD*)pMem + 76) = 0;
+			*((DWORD*)pMem + 77) = 0;
+		}
 
 		return (DWORD)pMem;
 	}

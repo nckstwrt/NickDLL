@@ -17,6 +17,9 @@ NSL
 B4 = 412680 awards function
 B8 = 412AC0 fixtures function
 
+40 = 686670 Promotion/Relegation
+
+
 00967768 00   C0 10 41 00 30 5D 68 00 E0 1D 41 00 10 CE 48 00  À.A.0]h.à.A..ÎH.
 00967778 10   D0 9A 68 00 C0 47 68 00 10 7B 68 00 C0 91 68 00  Ð.h.ÀGh..{h.À.h.
 00967788 20   B0 CE 48 00 A0 CE 48 00 70 1F 41 00 70 CE 48 00  °ÎH. ÎH.p.A.pÎH.
@@ -32,6 +35,8 @@ B8 = 412AC0 fixtures function
 
 ser c1/a
 3C = 64AD80 - fixtures2 ? huge for c1/a
+
+58
 
 0096C534 00   A0 AC 64 00 30 5D 68 00 20 B8 64 00 10 CE 48 00   ¬d.0]h. ¸d..ÎH.
 0096C544 10   D0 9A 68 00 C0 47 68 00 10 7B 68 00 C0 91 68 00  Ð.h.ÀGh..{h.À.h.
