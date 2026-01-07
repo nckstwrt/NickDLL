@@ -99,7 +99,7 @@ void sub_64B9E0();
 int AddTeams(BYTE* _this);
 void fixture_caller();
 
-vtable vtable_ita_ser_c1a((DWORD)&sub_64ACA0, (DWORD)&sub_64B820, (DWORD)&sub_64B9E0, 0x684640, (DWORD)&fixture_caller/*sub_64AD80_fixtures*/, 0x654180, 0x654390, 0x48E180, (DWORD)&sub_64BD80, 0x48F2D0, (DWORD)&sub_64B770, 0x64EE50, 0x685D30);
+vtable vtable_ita_ser_c1a((DWORD)&sub_64ACA0, (DWORD)&sub_64B820, (DWORD)&sub_64B9E0, 0x684640, (DWORD)&fixture_caller/*sub_64AD80_fixtures*/, 0x654180, 0x654390, 0x48E180, (DWORD)&sub_64BD80, 0x48F2D0, (DWORD)&sub_64B770, -1L, 0x64EE50, 0x685D30);
 
 void __declspec(naked) sub_64AA70()
 {

@@ -239,7 +239,7 @@ _005837AD:
 extern "C" void __declspec(naked) european_cup_setup_5837C0() // On Setup: First Function called
 {
 	__asm pushad
-	dprintf("european_cup_setup_5837C0 Called!\n");
+	//dprintf("european_cup_setup_5837C0 Called!\n");
 	__asm popad
 
 
@@ -409,7 +409,7 @@ _005839B4:
 extern "C" void __declspec(naked) sub_5839D0()
 {
 	__asm pushad
-	dprintf("sub_5839D0 Called!\n");
+	//dprintf("sub_5839D0 Called!\n");
 	__asm popad
 
 
@@ -423,7 +423,7 @@ extern "C" void __declspec(naked) sub_5839D0()
 extern "C" void __declspec(naked) sub_5839E0()
 {
 	__asm pushad
-	dprintf("sub_5839E0 Called!\n");
+	//dprintf("sub_5839E0 Called!\n");
 	__asm popad
 
 	__asm
@@ -446,7 +446,7 @@ _005839F8:
 extern "C" void __declspec(naked) sub_583A00()
 {
 	__asm pushad
-	dprintf("sub_583A00 Called!\n");
+	//dprintf("sub_583A00 Called!\n");
 	__asm popad
 
 	__asm
@@ -552,7 +552,7 @@ _00583AE1:
 extern "C" void __declspec(naked) sub_583B10()			// Gets called as part of match_day (initially 9 times for the first round results)
 {
 	__asm pushad
-	dprintf("sub_583B10 Called!\n");
+	//dprintf("sub_583B10 Called!\n");
 	__asm popad
 
 	__asm
@@ -679,7 +679,7 @@ _00583C35:
 extern "C" void __declspec(naked) european_cup_schedule_583C50()
 {
 	__asm pushad
-	dprintf("european_cup_schedule_583C50 Called!\n");
+	//dprintf("european_cup_schedule_583C50 Called!\n");
 	__asm popad
 
 	__asm
@@ -1855,7 +1855,7 @@ extern "C" void __stdcall LogTeam(DWORD club)		// will crash if not __stdcall
 extern "C" void __declspec(naked) european_cup_get_qualifying_teams_584990()		// Third Function called
 {
 	__asm pushad
-	dprintf("european_cup_get_qualifying_teams_584990 Called!\n");
+	//dprintf("european_cup_get_qualifying_teams_584990 Called!\n");
 	__asm popad
 
 
@@ -1974,7 +1974,7 @@ _00584AB2:
 extern "C" void __declspec(naked) sub_584AD0()
 {
 	__asm pushad
-	dprintf("sub_584AD0 Called!\n");
+	//dprintf("sub_584AD0 Called!\n");
 	__asm popad
 
 	__asm
@@ -1989,7 +1989,7 @@ extern "C" void __declspec(naked) sub_584AD0()
 extern "C" void __declspec(naked) sub_584AE0()
 {
 	__asm pushad
-	dprintf("sub_584AE0 Called!\n");
+	//dprintf("sub_584AE0 Called!\n");
 	__asm popad
 
 	__asm
@@ -2243,7 +2243,7 @@ _00584D4E:
 extern "C" void __declspec(naked) sub_584D60()
 {
 	__asm pushad
-	dprintf("sub_584D60 Called!\n");
+	//dprintf("sub_584D60 Called!\n");
 	__asm popad
 
 	__asm
@@ -2451,7 +2451,7 @@ _00584F83:
 extern "C" void __declspec(naked) european_cup_select_teams_584FA0()		// On Seup: Second Function called (once) - Select Teams?
 {
 	__asm pushad
-	dprintf("european_cup_select_teams_584FA0 Called!\n");
+	//dprintf("european_cup_select_teams_584FA0 Called!\n");
 	__asm popad
 
 	__asm
@@ -2632,7 +2632,7 @@ _005851B4:
 extern "C" void __declspec(naked) sub_5851D0()
 {
 	__asm pushad
-	dprintf("sub_5851D0 Called!\n");
+	//dprintf("sub_5851D0 Called!\n");
 	__asm popad
 
 	__asm
@@ -2698,7 +2698,7 @@ _0058527C:
 extern "C" void __declspec(naked) sub_585290()
 {
 	__asm pushad
-	dprintf("sub_585290 Called!\n");
+	//dprintf("sub_585290 Called!\n");
 	__asm popad
 
 	__asm
@@ -3409,7 +3409,7 @@ _00585A89:
 extern "C" void __declspec(naked) sub_585AB0()
 {
 	__asm pushad
-	dprintf("sub_585AB0 Called!\n");
+	//dprintf("sub_585AB0 Called!\n");
 	__asm popad
 
 	__asm
@@ -4132,7 +4132,7 @@ _00586314:
 extern "C" void __declspec(naked) sub_586330()
 {
 	__asm pushad
-	dprintf("sub_586330 Called!\n");
+	//dprintf("sub_586330 Called!\n");
 	__asm popad
 
 	__asm
@@ -4409,7 +4409,7 @@ _00586641:
 extern "C" void __declspec(naked) sub_586660()
 {
 	__asm pushad
-	dprintf("sub_586660 Called!\n");
+	//dprintf("sub_586660 Called!\n");
 	__asm popad
 
 	__asm
@@ -4644,7 +4644,7 @@ _005868D9:
 extern "C" void __declspec(naked) sub_586900()		// Called at end of setup
 {
 	__asm pushad
-	dprintf("sub_586900 Called!\n");
+	//dprintf("sub_586900 Called!\n");
 	__asm popad
 
 	__asm
@@ -4924,7 +4924,7 @@ _00586BEC:
 extern "C" void __declspec(naked) sub_586FA0()
 {
 	__asm pushad
-	dprintf("sub_586FA0 Called!\n");
+	//dprintf("sub_586FA0 Called!\n");
 	__asm popad
 
 	__asm
@@ -5114,7 +5114,7 @@ _005871AE:
 extern "C" void __declspec(naked) sub_5871E0()
 {
 	__asm pushad
-	dprintf("sub_5871E0 Called!\n");
+	//dprintf("sub_5871E0 Called!\n");
 	__asm popad
 
 	__asm
@@ -5148,7 +5148,7 @@ _0058721B:
 extern "C" void __declspec(naked) sub_587220()
 {
 	__asm pushad
-	dprintf("sub_587220 Called!\n");
+	//dprintf("sub_587220 Called!\n");
 	__asm popad
 
 	__asm

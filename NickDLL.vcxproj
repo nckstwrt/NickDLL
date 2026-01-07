@@ -146,6 +146,7 @@
     <ClCompile Include="LeagueSelect.cpp" />
     <ClCompile Include="NickDLL.cpp" />
     <ClCompile Include="sudamericana.cpp" />
+    <ClCompile Include="tapani_relegation_patch.cpp" />
     <ClCompile Include="tiny-json.c" />
   </ItemGroup>
   <ItemGroup>

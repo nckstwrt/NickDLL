@@ -175,7 +175,7 @@ namespace ConvertASM
 
             if (line.StartsWith("jmp ") || line.StartsWith("je ") || line.StartsWith("jne ") || line.StartsWith("jz ") || line.StartsWith("jnz ") ||
                 line.StartsWith("jbe ") || line.StartsWith("jge ") || line.StartsWith("jle ") || line.StartsWith("jl ") || line.StartsWith("jg ") ||
-                line.StartsWith("ja ") || line.StartsWith("jae ") || line.StartsWith("jb "))
+                line.StartsWith("ja ") || line.StartsWith("jae ") || line.StartsWith("jb ") || line.StartsWith("jecxz ") || line.StartsWith("loop "))
             {
                 if (!line.Contains("dword"))   // Don't handle jmp dword ptr ds:[edx+30] 
                 {

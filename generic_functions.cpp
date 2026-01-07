@@ -61,7 +61,7 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 	{
 		if (a5)
 			*a5 = 1;
-		*a3 = (24 - 1) * 2;		// Number of Fixtures = 0x22 (34 i.e. (number of teams - 1) * 2) 18 in ser c1/a (23 in nothern prem) (eng third: 24)
+		*a3 = (team_count - 1) * 2;		// Number of Fixtures = 0x22 (34 i.e. (number of teams - 1) * 2) 18 in ser c1/a (23 in nothern prem) (eng third: 24)
 		*a4 = 0;
 		BYTE* pMem = (BYTE*)sub_944E46_malloc((*a3) * 65);	// Allocate memory for fixtures
 		WORD year = *(WORD*)(_this + 0x40);
@@ -166,9 +166,13 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 		AddFixture(pMem, fixture++, Date(year + 1, 4, 14), year, Saturday);
 		AddFixture(pMem, fixture++, Date(year + 1, 4, 16), year, Monday, 2);
 		AddFixture(pMem, fixture++, Date(year + 1, 4, 21), year, Saturday);
-		AddFixture(pMem, fixture++, Date(year + 1, 4, 28), year, Saturday);
+		
 
-		AddFixture(pMem, fixture++, Date(year + 1, 5, 4), year, Sunday);
+		if (team_count >= 24)
+		{
+			AddFixture(pMem, fixture++, Date(year + 1, 4, 28), year, Saturday);
+			AddFixture(pMem, fixture++, Date(year + 1, 5, 4), year, Sunday);
+		}
 
 		dprintf("fixtures added: %d\n", fixture - 1);
 
@@ -196,7 +200,7 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 
 			sub_521E60_add_playoff_fixture_call(pMem, 0, 7, 4, 1, 0, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 0, 12, 4, 1, 5, 1, year, 0);
-			*(WORD*)(pMem + 0x7) = 0x82;		
+			*(WORD*)(pMem + 0x7) = 0x82;		// *10
 			*(WORD*)(pMem + 0x9) = 0x0;
 			*(WORD*)(pMem + 0xB) = 0x0;
 			*(WORD*)(pMem + 0xD) = 0x204;		
@@ -241,10 +245,10 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 
 			sub_521E60_add_playoff_fixture_call(pMem, 0, 3, 4, 1, 0, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 0, 5, 4, 1, 2, 2, year, 0);
-			*(WORD*)(pMem + 7) = 120;
+			*(WORD*)(pMem + 7) = 0x78;
 			*(WORD*)(pMem + 9) = 0;
 			*(WORD*)(pMem + 11) = 0;
-			*(WORD*)(pMem + 13) = 515;
+			*(WORD*)(pMem + 13) = 0x203;
 			pMem[23] = 5;
 			*((WORD*)pMem + 12) = 4;
 			*((WORD*)pMem + 13) = 2;
@@ -260,17 +264,17 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 
 			sub_521E60_add_playoff_fixture_call(pMem, 1, 6, 4, 1, 3, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 1, 8, 4, 1, 5, 1, year, 0);
-			*(WORD*)(pMem + 111) = 130;
-			*(WORD*)(pMem + 113) = 1;
-			*(WORD*)(pMem + 115) = 0;
-			*(WORD*)(pMem + 117) = 1027;
+			*(WORD*)(pMem + 104 + 7) = 0x82;
+			*(WORD*)(pMem + 104 + 9) = 1;
+			*(WORD*)(pMem + 104 + 11) = 0;
+			*(WORD*)(pMem + 104 + 13) = 0x403;
 			pMem[127] = 5;
-			*((WORD*)pMem + 64) = 4;
-			*((WORD*)pMem + 65) = 2;
-			*((WORD*)pMem + 66) = 2;
-			*(WORD*)(pMem + 119) = 3;
-			*((WORD*)pMem + 67) = 4;
-			*(DWORD*)(pMem + 135) = 16842752;
+			*((WORD*)pMem + (104/2) + 12) = 4;
+			*((WORD*)pMem + (104/2) + 13) = 2;
+			*((WORD*)pMem + (104/2) + 14) = 2;
+			*(WORD*)(pMem + 104 + 15) = 3;
+			*((WORD*)pMem + (104/2) + 15) = 4;
+			*(DWORD*)(pMem + 135) = 0x1010000;
 			*((DWORD*)pMem + 49) = 0;
 			*((DWORD*)pMem + 50) = 0;
 			*((DWORD*)pMem + 51) = 0;
@@ -281,7 +285,7 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 			*((WORD*)pMem + 116) = 2;
 			*((WORD*)pMem + 117) = 1;
 			*((WORD*)pMem + 118) = 0;
-			*(WORD*)(pMem + 215) = 150;
+			*(WORD*)(pMem + 215) = 0x96;
 			*(WORD*)(pMem + 219) = 0;
 			*(WORD*)(pMem + 221) = 3;
 			pMem[231] = 5;
@@ -298,4 +302,54 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 		return (DWORD)pMem;
 	}
 	return 0;
+}
+
+// Not part of the Tapani patches but one of the hooks needed to call our relegation code. Standard B0 in vtable for relegation/promotion
+static int(*sub_689C80)() = (int(*)())(0x689C80);
+void sub_601FF0();
+void __declspec(naked) sub_689C20_relegation_hook()
+{
+	__asm
+	{
+	/*00689C20*/	push ebx
+	/*00689C21*/	mov ebx,ecx
+	/*00689C23*/	push edi
+	/*00689C24*/	mov eax,dword ptr ds:[ebx+0x1C]
+	/*00689C27*/	test eax,eax
+	/*00689C29*/	jge _00689C73
+	/*00689C2B*/	mov eax,dword ptr ds:[ebx]
+	/*00689C2D*/	mov edi,ebx
+	/*00689C2F*/	call dword ptr ds:[eax+0xA4]
+	/*00689C35*/	mov eax,dword ptr ds:[ebx+0x20]
+	/*00689C38*/	test eax,eax
+	/*00689C3A*/	jl _00689C73
+	/*00689C3C*/	push ebp
+	/*00689C3D*/	mov ebp,dword ptr ss:[esp+0x10]
+	/*00689C41*/	push esi
+_00689C42:
+	/*00689C42*/	mov ecx,dword ptr ds:[0xADADFC]
+	/*00689C48*/	mov esi,dword ptr ds:[ecx+eax*0x4]
+	/*00689C4B*/	mov ecx,esi
+	/*00689C4D*/	mov edx,dword ptr ds:[esi]
+	/*00689C4F*/	call dword ptr ds:[edx+0xA4]
+	/*00689C55*/	push 0xFFFFFFFF
+	/*00689C57*/	push 0xFFFFFFFF
+	/*00689C59*/	push ebp
+	/*00689C5A*/	push 0x1
+	/*00689C5C*/	push esi
+	/*00689C5D*/	push edi
+	/*00689C5E*/	mov ecx,ebx
+	/*00689C60*/	call sub_689C80		/*call <cm0102.sub_689C80>*/
+	/*00689C65*/	mov eax,dword ptr ds:[esi+0x20]
+	/*00689C68*/	mov edi,esi
+	/*00689C6A*/	test eax,eax
+	/*00689C6C*/	jge _00689C42
+	/*00689C6E*/	call sub_601FF0		/*call <cm0102.sub_601FF0>*/		// <---- additional call added by Tapani
+_00689C73:
+	/*00689C73*/	pop esi
+	/*00689C74*/	pop ebp
+	/*00689C75*/	pop edi
+	/*00689C76*/	pop ebx
+	/*00689C77*/	ret 0x4
+	}
 }

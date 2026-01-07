@@ -19,6 +19,7 @@ B8 = 412AC0 fixtures function
 
 40 = 686670 Promotion/Relegation
 
+B0 = 689C20 Where you put the hook for relegation if required (00689C20 for third division and many others)
 
 00967768 00   C0 10 41 00 30 5D 68 00 E0 1D 41 00 10 CE 48 00  À.A.0]h.à.A..ÎH.
 00967778 10   D0 9A 68 00 C0 47 68 00 10 7B 68 00 C0 91 68 00  Ð.h.ÀGh..{h.À.h.
@@ -58,7 +59,7 @@ ser c1/a
 class vtable
 {
 public:
-	vtable(DWORD loc0 = -1L, DWORD loc8 = -1L, DWORD loc28 = -1L, DWORD loc30 = -1L, DWORD loc3C = -1L, DWORD loc44 = -1L, DWORD loc48 = -1L, DWORD loc50 = -1L, DWORD loc68 = -1L, DWORD loc7C = -1L, DWORD loc8C = -1L, DWORD locB4 = -1L, DWORD locB8 = -1L)
+	vtable(DWORD loc0 = -1L, DWORD loc8 = -1L, DWORD loc28 = -1L, DWORD loc30 = -1L, DWORD loc3C = -1L, DWORD loc44 = -1L, DWORD loc48 = -1L, DWORD loc50 = -1L, DWORD loc68 = -1L, DWORD loc7C = -1L, DWORD loc8C = -1L, DWORD locB0 = -1L, DWORD locB4 = -1L,  DWORD locB8 = -1L)
 	{
 		if (loc0 != -1L) SetPointer(0x0, loc0);
 		if (loc8 != -1L) SetPointer(0x8, loc8);
@@ -71,6 +72,7 @@ public:
 		if (loc68 != -1L) SetPointer(0x68, loc68);
 		if (loc7C != -1L) SetPointer(0x7C, loc7C);
 		if (loc8C != -1L) SetPointer(0x8C, loc8C);
+		if (locB0 != -1L) SetPointer(0xB0, locB0);
 		if (locB4 != -1L) SetPointer(0xB4, locB4);
 		if (locB8 != -1L) SetPointer(0xB8, locB8);
 	}
@@ -83,7 +85,7 @@ public:
 	static void PrintVTable(DWORD addr, const char *tableName = "")
 	{
 		BYTE* ptr = (BYTE*)addr;
-		BYTE locs[] = { 0x0, 0x8, 0x28, 0x30, 0x3C, 0x44, 0x48, 0x50, 0x68, 0x7C, 0x8C, 0xB4, 0xB8 };
+		BYTE locs[] = { 0x0, 0x8, 0x28, 0x30, 0x3C, 0x44, 0x48, 0x50, 0x68, 0x7C, 0x8C, 0xB0, 0xB4, 0xB8 };
 		dprintf("%s VTable at %08X:\n", tableName, addr);
 		for (BYTE i = 0; i < sizeof(locs); i++)
 			dprintf("%d. %02X = %08X\n", i, locs[i], (*(DWORD*)&ptr[locs[i]]));

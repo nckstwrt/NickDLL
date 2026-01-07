@@ -55,9 +55,10 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this);		// We cheat with a fastcall 
 void sub_577000();
 void sub_578170();
 void sub_578330();
+int __fastcall sub_578330_c(int* _this);				// called by league.cpp on 4th May - Cup related
 void sub_5770E0_add_fixtures();
 void sub_576C50();
-void sub_5783C0();
+DWORD sub_5783C0();
 void sub_5785B0();
 void sub_578660();
 
@@ -84,19 +85,20 @@ eng_third VTable at 00969E84:
 1. 08 = 00578170
 2. 28 = 00578330
 3. 30 = 00684640
-4. 3C = 005770E0
+4. 3C = 005770E0		// Fixtures
 5. 44 = 00576C50
 6. 48 = 005785B0
 7. 50 = 0048E180
 8. 68 = 00578660
 9. 7C = 0048F2D0
-10. 8C = 005780C0
+10. 8C = 005780C0		// Subs / Promo/Rele Places / etc
 11. B4 = 005788C0		// Awards
 12. B8 = 00579610
 */
+// B0 = Could this be the relegation one?
 
 // Normally at: 0x969E84
-vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, (DWORD)&sub_578330, 0x684640, (DWORD)&/*sub_5770E0_add_fixtures*/eng_fixture_caller, (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, 0x5788C0, 0x579610);
+vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, (DWORD)&sub_578330_c, 0x684640, (DWORD)&/*sub_5770E0_add_fixtures*/eng_fixture_caller, (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, (DWORD)&sub_689C20_relegation_hook, 0x5788C0, 0x579610);
 DWORD SecondDivisionCompID, ThirdDivisionCompID, ConferenceDivisionCompID, NorthernConferenceDivisionCompID, SouthernConferenceDivisionCompID;
 
 void __declspec(naked) sub_576C50()
@@ -2296,7 +2298,8 @@ _0057809B:
 
 int __fastcall sub_5780C0_set_subs_c(BYTE* _this)
 {
-	DWORD CompID = *(DWORD*)*((DWORD*)(_this + 4));
+	BYTE* comp = (BYTE*)*(DWORD*)(_this + 4);
+	DWORD CompID = *(DWORD*)(comp);
 	dprintf("sub_5780C0_set_subs_c - CompID: %08X\n", CompID);
 
 	*(WORD*)(_this + 0x3C) = 2;
@@ -2315,13 +2318,15 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)
 	*(DWORD*)(_this + 0x1C) = -1L;		// Promotion League
 	*(DWORD*)(_this + 0x20) = -1L;		// Relegation League
 
-	bool includingConference = ((*(BYTE*)(*(DWORD*)(*((DWORD*)_this + 1) + 93) + 284) & 4) != 0);
+	//bool includingConference = ((*(BYTE*)(*(DWORD*)(*((DWORD*)_this + 1) + 93) + 284) & 4) != 0);
+	cm3_nations *nation = (cm3_nations*)*(DWORD*)(comp + 0x5D);
+	bool includingConference = ((nation->NationLeagueSelected & 4) == 4);		// Normally either 2 (no conf) or 6 (conf)
 
 	if (CompID == ThirdDivisionCompID)
 	{
 		_this[0xBE] = 3;		// Promotion Places
 		_this[0xBF] = 4;		// Play off places
-		_this[0xC1] = 1;		// Relegation places
+		_this[0xC1] = 1; //includingConference ? 2 : 1;		// Relegation places
 
 		*(DWORD*)(_this + 0x1C) = SecondDivisionCompID;
 		*(DWORD*)(_this + 0x20) = includingConference ? ConferenceDivisionCompID : -1L;
@@ -2340,10 +2345,10 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)
 	if (CompID == NorthernConferenceDivisionCompID)
 	{
 		_this[0xBE] = 1;		// Promotion Places
-		_this[0xBF] = 6;		// Play off places
-		_this[0xC1] = 4;		// Relegation places
+		_this[0xBF] = 4;		// Play off places
+		_this[0xC1] = 1;		// Relegation places
 
-		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
+		*(DWORD*)(_this + 0x1C) = -1L; //ConferenceDivisionCompID;
 		*(DWORD*)(_this + 0x20) = -1L;
 	}
 
@@ -2591,12 +2596,32 @@ _00578301:
 	}
 }
 
-void __declspec(naked) sub_578330()
+int __fastcall sub_578330_c(int* _this)  // called by league.cpp on 4th May
+{
+	int result = 0;
+	int v1 = _this[12];
+	
+	if (v1 < _this[11] - 1)
+	{
+		result = v1 + 1;
+		_this[12] = result;
+		if (!result)
+		{
+			(*(int(__thiscall*)(int*))sub_5783C0)(_this);		// __thiscall sub_5783C0
+		}
+	}
+	else
+		dprintf("sub_578330_c - Something went wrong!");
+	
+	return result;
+}
+
+void __declspec(naked) sub_578330()	// called by league.cpp on 4th May
 {
 	__asm
 	{
-	/*00578330*/	mov edx,dword ptr ds:[ecx+0x2C]
-	/*00578333*/	mov eax,dword ptr ds:[ecx+0x30]
+	/*00578330*/	mov edx,dword ptr ds:[ecx+0x2C]		// =1 ?
+	/*00578333*/	mov eax,dword ptr ds:[ecx+0x30]		// =0xFFFFFFFF
 	/*00578336*/	sub esp,0x200
 	/*0057833C*/	dec edx
 	/*0057833D*/	cmp eax,edx
@@ -2639,7 +2664,7 @@ _005783B8:
 	/*005783BE*/	ret
 	}
 }
-void __declspec(naked) sub_5783C0()
+DWORD __declspec(naked) sub_5783C0()  // Called by above function. Mainly to call cup_stage.cpp func sub_522E00
 {
 	__asm {
 	/*005783D5*/	sub esp,0x418
@@ -2779,7 +2804,7 @@ _00578583:
 	}
 }
 
-void __declspec(naked) sub_5785B0()
+void __declspec(naked) sub_5785B0()		// +48 vtable
 {
 	__asm
 	{
@@ -2805,7 +2830,7 @@ void __declspec(naked) sub_5785B0()
 	/*005785E8*/	push edx
 	/*005785E9*/	push eax
 	/*005785EA*/	push eax
-	/*005785EB*/	push 0x989C18		/*push cm0102.989C18*/
+	/*005785EB*/	push 0x989C18		/*push cm0102.989C18*/		// {}<%s - Team Name(e.g.Brighton)>{} win promotion
 	/*005785F0*/	push 0xDE1F64		/*push cm0102.DE1F64*/
 	/*005785F5*/	call sub_66F4E0		/*call cm0102.66F4E0*/
 	/*005785FA*/	mov edi,dword ptr ss:[esp+0x44]
@@ -2971,8 +2996,56 @@ _00578762:
 	}
 }
 
+void __declspec(naked) sub_conference_subs_56EDE0()
+{
+	__asm
+	{
+	/*0056EDE0*/	push ebx
+	/*0056EDE1*/	push esi
+	/*0056EDE2*/	mov esi,ecx
+	/*0056EDE4*/	mov al,0x3
+	/*0056EDE6*/	mov ecx,0x2
+	/*0056EDEB*/	mov ebx,0x1
+	/*0056EDF0*/	mov word ptr ds:[esi+0x3C],cx
+	/*0056EDF4*/	mov byte ptr ds:[esi+0xC4],cl
+	/*0056EDFA*/	mov byte ptr ds:[esi+0xC6],cl
+	/*0056EE00*/	xor ecx,ecx
+	/*0056EE02*/	mov byte ptr ds:[esi+0xC2],al
+	/*0056EE08*/	mov byte ptr ds:[esi+0xC3],bl
+	/*0056EE0E*/	mov byte ptr ds:[esi+0x42],bl
+	/*0056EE11*/	mov byte ptr ds:[esi+0xC5],bl
+	/*0056EE17*/	mov byte ptr ds:[esi+0xC7],al
+	/*0056EE1D*/	mov byte ptr ds:[esi+0xBE],1				// Promotion (1)
+	/*0056EE23*/	mov byte ptr ds:[esi+0xBF],0				// Play off (0)
+	/*0056EE29*/	mov byte ptr ds:[esi+0xC0],0				// Relegation Playoff (0)
+	/*0056EE2F*/	mov byte ptr ds:[esi+0xC1],2				// Relegation (3)
+	/*0056EE35*/	mov edx,dword ptr ds:[0x9CF5C8]
+	/*0056EE3B*/	push ecx
+	/*0056EE3C*/	mov dword ptr ds:[esi+0x1C],edx
+	/*0056EE3F*/	lea ecx,dword ptr ds:[esi+0x3A]
+	/*0056EE42*/	lea edx,dword ptr ds:[esi+0xA9]
+	/*0056EE48*/	mov byte ptr ds:[esi+0x4A],al
+	/*0056EE4B*/	mov eax,dword ptr ds:[esi]
+	/*0056EE4D*/	push ecx
+	/*0056EE4E*/	push edx
+	/*0056EE4F*/	push 0xFFFFFFFF
+	/*0056EE51*/	mov ecx,esi
+	/*0056EE53*/	mov dword ptr ds:[esi+0x20],0xFFFFFFFF
+	/*0056EE5A*/	mov byte ptr ds:[esi+0x49],0x5
+	/*0056EE5E*/	mov byte ptr ds:[esi+0xC5],bl
+	/*0056EE64*/	call dword ptr ds:[eax+0x3C]
+	/*0056EE67*/	mov dword ptr ds:[esi+0xBA],eax
+	/*0056EE6D*/	mov eax,ebx
+	/*0056EE6F*/	pop esi
+	/*0056EE70*/	pop ebx
+	/*0056EE71*/	ret
+	}
+}
+
 void patch_eng_third()
 {
 	vtable::PrintVTable(0x969E84, "eng_third");
 	PatchFunction(0x576DD0, (DWORD)&sub_576DD0_eng_third_init);
+	PatchFunction(0x56EDE0, (DWORD)&sub_conference_subs_56EDE0);
 }
+

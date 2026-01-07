@@ -22,3 +22,4 @@ static int(__thiscall* sub_687430_add_team_call)(BYTE* _this, BYTE teamNo, cm3_c
 int AddTeams(BYTE* _this);
 void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DWORD league_init_addr);
 DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5);
+void sub_689C20_relegation_hook();
