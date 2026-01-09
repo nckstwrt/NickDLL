@@ -19,6 +19,7 @@
 #include "ita_ser_c1a.h"
 #include "eng_setup.h"
 #include "eng_third.h"
+#include "eng_prm.h"
 #include "Date.h"
 
 using namespace std;
@@ -58,9 +59,10 @@ void Setup()
 	//patch_ita_ser_c1a();
 	patch_eng_setup();
 	patch_eng_third();
+	patch_eng_prm();
 
 	/*
-	Date Testing
+	// Date Testing
 	BYTE date_bytes[] = { 0x4E, 0x01, 0xD1, 0x07 };
 	Date date(date_bytes);
 

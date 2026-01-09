@@ -13,6 +13,10 @@ void WriteDWORD(DWORD addr, DWORD data);
 void PatchFunction(DWORD addr, DWORD jmpTo);
 int GetKey();
 
+DWORD Get9CF(DWORD id);
+cm3_clubs* get_club(DWORD clubID);
+int get_club_count();
+BYTE *get_loaded_league(DWORD compID);
 cm3_nations *find_country(const char *szCountry);
 cm3_clubs* find_club(const char *szClub);
 cm3_club_comps* find_club_comp(const char *szClubComp);

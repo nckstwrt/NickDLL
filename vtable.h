@@ -4,7 +4,7 @@
 /*
 NSL
 0 = 4110C0   calls sub_4110E0
-8 = 411DE0   end of season function?
+8 = 411DE0   end of season function? used by tapani to do the relegation code
 28 = 411F70
 30 = 411D90  small func calls a bunch of other aus_nsl functions
 3C = 4111A0  fixtures2? (called by subs)
@@ -51,6 +51,22 @@ ser c1/a
 0096C5C4 90   D0 AA 68 00 D0 4C 68 00 90 47 68 00 B0 47 68 00  Ðªh.ÐLh..Gh.°Gh.
 0096C5D4 A0   20 7A 68 00 50 00 65 00 E0 11 40 00 F0 11 40 00   zh.P.e.à.@.ð.@.
 0096C5E4 B0   20 9C 68 00 50 EE 64 00
+
+
+eng_third:
+00969E84 00  00 70 57 00 30 5D 68 00 70 81 57 00 10 CE 48 00  .pW.0]h.p.W..ÎH.
+00969E94 10  D0 9A 68 00 C0 47 68 00 10 7B 68 00 C0 91 68 00  Ð.h.ÀGh..{h.À.h.
+00969EA4 20  B0 CE 48 00 A0 CE 48 00 30 83 57 00 70 CE 48 00  °ÎH. ÎH.0.W.pÎH.
+00969EB4 30  40 46 68 00 70 34 58 00 B0 CA 48 00 E0 70 57 00  @Fh.p4X.°ÊH.àpW.
+00969EC4 40  70 66 68 00 50 6C 57 00 B0 85 57 00 A0 DF 48 00  pfh.PlW.°.W. ßH.
+00969ED4 50  80 E1 48 00 E0 A3 68 00 C0 E1 48 00 50 A8 68 00  .áH.à£h.ÀáH.P¨h.
+00969EE4 60  60 E3 48 00 50 B5 5B 00 60 86 57 00 70 34 58 00  `ãH.Pµ[.`.W.p4X.
+00969EF4 70  C0 11 40 00 D0 11 40 00 00 CE 5D 00 D0 F2 48 00  À.@.Ð.@..Î].ÐòH.
+00969F04 80  D0 AB 68 00 40 AC 68 00 00 CE 5D 00 C0 80 57 00  Ð«h.@¬h..Î].À.W.
+00969F14 90  D0 AA 68 00 D0 4C 68 00 90 47 68 00 B0 47 68 00  Ðªh.ÐLh..Gh.°Gh.
+00969F24 A0  20 7A 68 00 30 AA 68 00 E0 11 40 00 F0 11 40 00   zh.0ªh.à.@.ð.@.
+00969F34 B0  20 9C 68 00 C0 88 57 00 10 96 57 00 B0 96 5A 00   .h.À.W...W.°.Z.
+
 
 
 */

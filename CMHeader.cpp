@@ -14,3 +14,4 @@ DWORD *club_comps_count = (DWORD *)0xAE2378;
 
 DWORD *current_year = (DWORD*)0xAE2C92;
 
+DWORD** loaded_leagues = (DWORD**)0xADADFC;

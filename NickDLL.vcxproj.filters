@@ -57,6 +57,9 @@
     <ClCompile Include="tapani_relegation_patch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="eng_prm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aus_nsl.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="generic_functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="eng_prm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

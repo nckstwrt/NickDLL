@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4996 4018)
+#pragma warning(disable : 4996 4018 6031)
+#include "CMHeader.h"
 #include "Helper.h"
 #include <stdio.h>
 #include <conio.h>
@@ -64,8 +65,30 @@ void PatchFunction(DWORD addr, DWORD jmpTo)
 
 int GetKey()
 {
+	while (_kbhit())
+		_getch(); // discard
 	printf("Press any key...");
 	return getch();
+}
+
+DWORD Get9CF(DWORD id)
+{
+	return *(DWORD*)id;
+}
+
+cm3_clubs* get_club(DWORD clubID)
+{
+	return &(*clubs)[clubID];
+}
+
+int get_club_count()
+{
+	return (int)*clubs_count;
+}
+
+BYTE* get_loaded_league(DWORD compID)
+{
+	return (BYTE*)*&(*loaded_leagues)[compID];
 }
 
 cm3_nations *find_country(const char *szCountry)

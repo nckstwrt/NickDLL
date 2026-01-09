@@ -297,4 +297,6 @@ extern DWORD *clubs_count;
 extern cm3_club_comps **club_comps;
 extern DWORD *club_comps_count;
 
+extern DWORD **loaded_leagues;
+
 extern DWORD* current_year;

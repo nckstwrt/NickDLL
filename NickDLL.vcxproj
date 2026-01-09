@@ -137,6 +137,7 @@
     <ClCompile Include="aus_nsl.cpp" />
     <ClCompile Include="CMHeader.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="eng_prm.cpp" />
     <ClCompile Include="eng_setup.cpp" />
     <ClCompile Include="eng_third.cpp" />
     <ClCompile Include="european_cup.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="CMHeader.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Date.h" />
+    <ClInclude Include="eng_prm.h" />
     <ClInclude Include="eng_setup.h" />
     <ClInclude Include="eng_third.h" />
     <ClInclude Include="european_cup.h" />

@@ -4,6 +4,31 @@
 #include "Helper.h"
 #include "Date.h"
 
+DWORD SecondDivisionCompID;
+DWORD ThirdDivisionCompID;
+DWORD ConferenceDivisionCompID;
+DWORD NorthernConferenceDivisionCompID;
+DWORD SouthernConferenceDivisionCompID;
+DWORD ALowerDivisionCompID;
+
+void GetCompIDs()
+{
+	SecondDivisionCompID = find_club_comp_id("English Second Division");
+	ThirdDivisionCompID = find_club_comp_id("English Third Division");
+	ConferenceDivisionCompID = find_club_comp_id("English Conference");
+	NorthernConferenceDivisionCompID = find_club_comp_id("English Northern Premier League Premier Division");
+	SouthernConferenceDivisionCompID = find_club_comp_id("English Southern League Premier Division");
+	ALowerDivisionCompID = find_club_comp_id("A Lower Division");
+
+	if (NorthernConferenceDivisionCompID != -1L)		// If the Northern league is missing a short acronym add one
+	{
+		if (_stricmp((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "") == 0)
+			strcpy((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "NLN");
+	}
+
+	dprintf("GetCompIDs: SecondDivisionCompID = %02X\nThirdDivisionCompID = %02X\nConferenceDivisionCompID = %02X\nNorthernConferenceDivisionCompID = %02X\nSouthernConferenceDivisionCompID = %02X\nALowerDivisionCompID = %02X\n", SecondDivisionCompID, ThirdDivisionCompID, ConferenceDivisionCompID, NorthernConferenceDivisionCompID, SouthernConferenceDivisionCompID, ALowerDivisionCompID);
+}
+
 int AddTeams(BYTE* _this)
 {
 	DWORD CompID = *(DWORD*)(*(DWORD*)(_this + 0x4));
@@ -200,10 +225,10 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 
 			sub_521E60_add_playoff_fixture_call(pMem, 0, 7, 4, 1, 0, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 0, 12, 4, 1, 5, 1, year, 0);
-			*(WORD*)(pMem + 0x7) = 0x82;		// *10
+			*(WORD*)(pMem + 0x7) = 0x82;		// 130 *10
 			*(WORD*)(pMem + 0x9) = 0x0;
 			*(WORD*)(pMem + 0xB) = 0x0;
-			*(WORD*)(pMem + 0xD) = 0x204;		
+			*(WORD*)(pMem + 0xD) = 0x204;		// 516
 			*(BYTE*)(pMem + 0x17) = 0x5;
 			*((WORD*)pMem + 0xC) = 0x4;
 			*(WORD*)(pMem + 0x1A) = 0x2;
@@ -221,7 +246,7 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 			sub_521EB0_add_playoff_fixture_call(pMem, 1, 26, 4, 1, 5, 1, year, 4);
 			*(WORD*)(pMem + 113) = 1;
 			*(WORD*)(pMem + 130) = 1;
-			*(WORD*)(pMem + 111) = 150;
+			*(WORD*)(pMem + 104 + 0x7) = 0x96;	// 150
 			*(WORD*)(pMem + 115) = 0;
 			*(WORD*)(pMem + 117) = 3;
 			*(BYTE*)(pMem + 127) = 5;

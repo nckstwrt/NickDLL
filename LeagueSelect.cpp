@@ -4,6 +4,7 @@
 #include <conio.h>
 #include "CMHeader.h"
 #include "Helper.h"
+#include "generic_functions.h"
 
 static int(*sub_7A1710)() = (int(*)())(0x7A1710);
 static int(*sub_41BFB0)() = (int(*)())(0x41BFB0);
@@ -24,7 +25,6 @@ static int(*sub_7FF010)() = (int(*)())(0x7FF010);
 static int(*sub_403320)() = (int(*)())(0x403320);
 static int(*sub_7FF270)() = (int(*)())(0x7FF270);
 
-static int(*sub_944CFF_splitpath)() = (int(*)())(0x944CFF);
 static int(*sub_90D130)() = (int(*)())(0x90D130);
 static int(*sub_5E8290)() = (int(*)())(0x5E8290);
 static int(*sub_945501)() = (int(*)())(0x945501);
@@ -288,6 +288,7 @@ void ModifyLeagues()
 void __declspec(naked) LeagueSelect_81D010()
 {
 	__asm pushad;
+	GetCompIDs();
 	ModifyLeagues();
 	__asm popad;
 
