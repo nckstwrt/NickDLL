@@ -28,6 +28,6 @@ extern DWORD ALowerDivisionCompID;
 
 void GetCompIDs();
 int AddTeams(BYTE* _this);
-void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DWORD league_init_addr);
+void AddLeague(BYTE* _this, DWORD compID, int leagueNo, int year, DWORD league_init_addr);
 DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5);
 void sub_689C20_relegation_hook();

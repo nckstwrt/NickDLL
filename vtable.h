@@ -67,7 +67,7 @@ eng_third:
 00969F24 A0  20 7A 68 00 30 AA 68 00 E0 11 40 00 F0 11 40 00   zh.0ªh.à.@.ð.@.
 00969F34 B0  20 9C 68 00 C0 88 57 00 10 96 57 00 B0 96 5A 00   .h.À.W...W.°.Z.
 
-
+// 0xC is a function that does a check to see if relegation/promo and defers the +8 season end call to the premier league to call instead
 
 */
 

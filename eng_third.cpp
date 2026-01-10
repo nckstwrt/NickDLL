@@ -62,6 +62,8 @@ DWORD sub_5783C0();
 void sub_5785B0();
 void sub_578660();
 
+void sub_DE844E_davdav_6playoffs();
+
 void __declspec(naked) eng_fixture_caller()		// used as a __thiscall -> __cdecl converter
 {
 	__asm
@@ -115,9 +117,9 @@ eng_prm.cpp VTable at 00969D1C:
 // B0 = Could this be the relegation one?
 
 // Normally at: 0x969E84
-vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, (DWORD)&sub_578330_c, 0x684640, (DWORD)&/*sub_5770E0_add_fixtures*/eng_fixture_caller, (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, (DWORD)&sub_689C20_relegation_hook, 0x5788C0, 0x579610);
+vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, /*+28*/ (DWORD)&sub_578330_c, 0x684640, (DWORD)&/*sub_5770E0_add_fixtures*/eng_fixture_caller, /*+44*/ (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, (DWORD)&sub_689C20_relegation_hook, 0x5788C0, 0x579610);
 
-void __declspec(naked) sub_576C50()
+void __declspec(naked) sub_576C50()	//+44
 {
 	__asm
 	{
@@ -279,8 +281,14 @@ void eng_third_init_additional()
 {
 	if (NorthernConferenceDivisionCompID != -1L)		// If the Northern league is missing a short acronym add one
 	{
-		if (_stricmp((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "") == 0)
-			strcpy((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "NLN");
+		if (_stricmp(get_comp(NorthernConferenceDivisionCompID)->ClubCompNameThreeLetter, "") == 0)
+			strcpy(get_comp(NorthernConferenceDivisionCompID)->ClubCompNameThreeLetter, "NLN");
+	}
+
+	if (SouthernConferenceDivisionCompID != -1L)		// If the Southern league is missing a short acronym add one
+	{
+		if (_stricmp(get_comp(SouthernConferenceDivisionCompID)->ClubCompNameThreeLetter, "") == 0)
+			strcpy(get_comp(SouthernConferenceDivisionCompID)->ClubCompNameThreeLetter, "NLS");
 	}
 }
 
@@ -315,7 +323,7 @@ void __declspec(naked) sub_576DD0_eng_third_init()
 	/*00576E1D*/	mov word ptr ds:[esi+0x40],ax
 	/*00576E21*/	mov word ptr ds:[esi+0xE2],0x1770
 	/*00576E2A*/	mov word ptr ds:[esi+0xE4],0x3E8
-	/*00576E33*/	mov byte ptr ds:[esi+0x50],0x9
+	/*00576E33*/	mov byte ptr ds:[esi+0x50],0x9							// <---- was 9 - davdav's is 11
 	/*00576E37*/	call sub_687B10		/*call cm0102.687B10*/
 	/*00576E3C*/	test eax,eax
 	/*00576E3E*/	jne _00576FE3
@@ -2310,7 +2318,7 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 	DWORD CompID = *(DWORD*)(comp);
 	dprintf("sub_5780C0_set_subs_c - CompID: %08X\n", CompID);
 
-	*(WORD*)(_this + 0x3C) = 2;
+	*(WORD*)(_this + 0x3C) = 2;		// Playoff related? (2)
 	_this[0xC2] = 3;
 	_this[0xC3] = 1;
 	_this[0xC4] = 2;
@@ -2352,9 +2360,9 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 
 	if (CompID == NorthernConferenceDivisionCompID)
 	{
-		_this[0xBE] = 3;		// Promotion Places
-		_this[0xBF] = 4;		// Play off places
-		_this[0xC1] = 3;		// Relegation places
+		_this[0xBE] = 1;		// Promotion Places
+		_this[0xBF] = 6;		// Play off places
+		_this[0xC1] = 4;		// Relegation places
 
 		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
 		*(DWORD*)(_this + 0x20) = -1L; //ALowerDivisionCompID;
@@ -2391,7 +2399,7 @@ void __declspec(naked) sub_conference_subs_56EDE0()
 	/*0056EDE4*/	mov al,0x3
 	/*0056EDE6*/	mov ecx,0x2
 	/*0056EDEB*/	mov ebx,0x1
-	/*0056EDF0*/	mov word ptr ds:[esi+0x3C],cx
+	/*0056EDF0*/	mov word ptr ds:[esi+0x3C],cx				// Playoff related? (2)
 	/*0056EDF4*/	mov byte ptr ds:[esi+0xC4],cl
 	/*0056EDFA*/	mov byte ptr ds:[esi+0xC6],cl
 	/*0056EE00*/	xor ecx,ecx
@@ -2666,7 +2674,13 @@ int __fastcall sub_578330_c(int* _this)  // called by league.cpp on 4th May
 		_this[12] = result;
 		if (!result)
 		{
-			(*(int(__thiscall*)(int*))sub_5783C0)(_this);		// __thiscall sub_5783C0
+			// if 4 playoffs we call this function, else we need to call davdav's for 6 playoffs
+			BYTE* _thisPtr = (BYTE*)_this;
+			dprintf("sub_578330_c - playoff places: %d\n", _thisPtr[0xBF]);
+			if (_thisPtr[0xBF] == 4)
+				(*(int(__thiscall*)(int*))sub_5783C0)(_this);		// __thiscall sub_5783C0
+			else
+				(*(int(__thiscall*)(int*))sub_DE844E_davdav_6playoffs)(_this);
 		}
 	}
 	else
@@ -3056,11 +3070,168 @@ _00578762:
 }
 
 
+void __declspec(naked) sub_48CE10_force_league_init()
+{
+	__asm 
+	{
+		mov eax, 1
+		ret
+	}
+	__asm
+	{
+	/*0048CE10*/	push esi
+	/*0048CE11*/	mov esi,ecx
+	/*0048CE13*/	cmp dword ptr ds:[esi+0x1C],0xFFFFFFFF
+	/*0048CE17*/	jle _0048CE1D
+	/*0048CE19*/	xor al,al
+	/*0048CE1B*/	pop esi
+	/*0048CE1C*/	ret
+_0048CE1D:
+	/*0048CE1D*/	mov eax,dword ptr ds:[esi]
+	/*0048CE1F*/	push 0x1
+	/*0048CE21*/	push 0x1
+	/*0048CE23*/	mov ecx,esi
+	/*0048CE25*/	call dword ptr ds:[eax+0x10]
+	/*0048CE28*/	test al,al
+	/*0048CE2A*/	jne _0048CE30
+_0048CE2C:
+	/*0048CE2C*/	xor al,al
+	/*0048CE2E*/	pop esi
+	/*0048CE2F*/	ret
+_0048CE30:
+	/*0048CE30*/	mov eax,dword ptr ds:[esi+0x20]
+	/*0048CE33*/	test eax,eax
+	/*0048CE35*/	jl _0048CE56
+_0048CE37:
+	/*0048CE37*/	mov ecx,dword ptr ds:[0xADADFC]
+	/*0048CE3D*/	push 0x1
+	/*0048CE3F*/	push 0x1
+	/*0048CE41*/	mov esi,dword ptr ds:[ecx+eax*0x4]
+	/*0048CE44*/	mov ecx,esi
+	/*0048CE46*/	mov edx,dword ptr ds:[esi]
+	/*0048CE48*/	call dword ptr ds:[edx+0x10]
+	/*0048CE4B*/	test al,al
+	/*0048CE4D*/	je _0048CE2C
+	/*0048CE4F*/	mov eax,dword ptr ds:[esi+0x20]
+	/*0048CE52*/	test eax,eax
+	/*0048CE54*/	jge _0048CE37
+_0048CE56:
+	/*0048CE56*/	mov al,0x1
+	/*0048CE58*/	pop esi
+	/*0048CE59*/	ret
+	}
+}
+
+void __declspec(naked) sub_DE844E_davdav_6playoffs()
+{
+	__asm
+	{
+	/*00DE844E*/	mov eax,dword ptr fs:[0x0]
+	/*00DE8454*/	push 0xFFFFFFFF
+	/*00DE8456*/	push 0x95845E		/*push <cm0102.sub_95845E>*/
+	/*00DE845B*/	push eax
+	/*00DE845C*/	mov dword ptr fs:[0x0],esp
+	/*00DE8463*/	sub esp,0x40C
+	/*00DE8469*/	push esi
+	/*00DE846A*/	mov esi,ecx
+	/*00DE846C*/	push edi
+	/*00DE846D*/	movsx eax,byte ptr ds:[esi+0xBF]
+	/*00DE8474*/	shl eax,0x2
+	/*00DE8477*/	push eax
+	/*00DE8478*/	call sub_944E46		/*call <cm0102.sub_944E46>*/
+	/*00DE847D*/	mov edi,eax
+	/*00DE847F*/	add esp,0x4
+	/*00DE84B9*/	mov edx,dword ptr ds:[esi+0xB1]
+	/*00DE84BF*/	push ebx
+	/*00DE84C0*/	push 0x0
+	/*00DE84C2*/	mov eax,dword ptr ds:[edx+0x162]
+	/*00DE84C8*/	mov dword ptr ds:[edi],eax
+	/*00DE84CA*/	mov ecx,dword ptr ds:[esi+0xB1]
+	/*00DE84D0*/	mov edx,dword ptr ds:[ecx+0xB1]
+	/*00DE84D6*/	mov dword ptr ds:[edi+0x4],edx
+	/*00DE84D9*/	mov eax,dword ptr ds:[esi+0xB1]
+	/*00DE84DF*/	mov ecx,dword ptr ds:[eax+0x127]
+	/*00DE84E5*/	mov dword ptr ds:[edi+0x8],ecx
+	/*00DE84E8*/	mov edx,dword ptr ds:[esi+0xB1]
+	/*00DE84EE*/	mov eax,dword ptr ds:[edx+0xEC]
+	/*00DE84F4*/	mov dword ptr ds:[edi+0xC],eax
+	/*00DE84F7*/	mov ecx,dword ptr ds:[esi+0xB1]
+	/*00DE84FD*/	mov edx,dword ptr ds:[ecx+0x3B]
+	/*00DE8500*/	mov dword ptr ds:[edi+0x10],edx
+	/*00DE8503*/	mov eax,dword ptr ds:[esi+0xB1]
+	/*00DE8509*/	lea ecx,dword ptr ss:[esp+0x10]
+	/*00DE850D*/	mov edx,dword ptr ds:[eax+0x76]
+	/*00DE8510*/	mov dword ptr ds:[edi+0x14],edx
+	/*00DE8513*/	mov edx,dword ptr ds:[esi]
+	/*00DE8515*/	lea eax,dword ptr ss:[esp+0x14]
+	/*00DE8519*/	push eax
+	/*00DE851A*/	push ecx
+	/*00DE851B*/	push 0x0
+	/*00DE851D*/	mov ecx,esi
+	/*00DE851F*/	call dword ptr ds:[edx+0x3C]
+	/*00DE8522*/	push 0xB2
+	/*00DE8527*/	mov ebx,eax
+	/*00DE8529*/	call sub_944CF1		/*call <cm0102.sub_944CF1>*/
+	/*00DE852E*/	add esp,0x4
+	/*00DE8531*/	mov dword ptr ss:[esp+0x14],eax
+	/*00DE8535*/	test eax,eax
+	/*00DE8537*/	mov dword ptr ss:[esp+0x420],0x0
+	/*00DE8542*/	je _00DE857A
+	/*00DE8544*/	mov edx,dword ptr ss:[esp+0x10]
+	/*00DE8548*/	mov cx,word ptr ds:[esi+0x40]
+	/*00DE854C*/	push 0x0
+	/*00DE854E*/	push 0x0
+	/*00DE8550*/	push 0x0
+	/*00DE8552*/	push 0x0
+	/*00DE8554*/	push 0x14
+	/*00DE8556*/	push edx
+	/*00DE8557*/	mov edx,dword ptr ds:[esi+0x4]
+	/*00DE855A*/	push 0x1
+	/*00DE855C*/	push 0x0
+	/*00DE855E*/	push ecx
+	/*00DE855F*/	mov ecx,dword ptr ss:[esp+0x30]
+	/*00DE8563*/	push ebx
+	/*00DE8564*/	push edx
+	/*00DE8565*/	push ecx
+	/*00DE8566*/	movsx dx,byte ptr ds:[esi+0xBF]
+	/*00DE856E*/	push edi
+	/*00DE856F*/	push edx
+	/*00DE8570*/	push esi
+	/*00DE8571*/	mov ecx,eax
+	/*00DE8573*/	call sub_522E00		/*call <cm0102.sub_522E00>*/
+	/*00DE8578*/	jmp _00DE857C
+_00DE857A:
+	/*00DE857A*/	xor eax,eax
+_00DE857C:
+	/*00DE857C*/	mov ecx,dword ptr ds:[esi+0xC]
+	/*00DE857F*/	push edi
+	/*00DE8580*/	mov dword ptr ss:[esp+0x424],0xFFFFFFFF
+	/*00DE858B*/	mov dword ptr ds:[ecx],eax
+	/*00DE858D*/	call sub_9452CA		/*call <cm0102.sub_9452CA>*/
+	/*00DE8592*/	push ebx
+	/*00DE8593*/	call sub_9452CA		/*call <cm0102.sub_9452CA>*/
+	/*00DE8598*/	mov edx,dword ptr ds:[esi+0xC]
+	/*00DE859B*/	add esp,0x8
+	/*00DE859E*/	mov ecx,dword ptr ds:[edx]
+	/*00DE85A0*/	pop ebx
+	/*00DE8629*/	push 0x0
+	/*00DE862B*/	call sub_51C800		/*call <cm0102.sub_51C800>*/
+	/*00DE8630*/	mov ecx,dword ptr ss:[esp+0x414]
+	/*00DE8637*/	pop edi
+	/*00DE8638*/	pop esi
+	/*00DE8639*/	mov dword ptr fs:[0x0],ecx
+	/*00DE8640*/	add esp,0x418
+	/*00DE8646*/	ret
+	}
+}
+
 void patch_eng_third()
 {
 	vtable::PrintVTable(0x969E84, "eng_third");
-	vtable::PrintVTable(0x970F80, "wel_first.cpp");
+	vtable::PrintVTable(0x969A74, "eng_conf");
+	// vtable::PrintVTable(0x970F80, "wel_first.cpp");
 	//PatchFunction(0x576DD0, (DWORD)&sub_576DD0_eng_third_init);
 	PatchFunction(0x56EDE0, (DWORD)&sub_conference_subs_56EDE0);
+	// vtable_eng_third.SetPointer(0xC, (DWORD)&sub_48CE10_force_league_init);
 }
 

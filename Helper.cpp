@@ -78,7 +78,7 @@ DWORD Get9CF(DWORD id)
 
 cm3_clubs* get_club(DWORD clubID)
 {
-	return &(*clubs)[clubID];
+	return (clubID != -1L) ? &(*clubs)[clubID] : NULL;
 }
 
 int get_club_count()
@@ -109,6 +109,11 @@ cm3_clubs *find_club(const char *szClub)
 			return &(*clubs)[i];
 	}
 	return NULL;
+}
+
+cm3_club_comps *get_comp(DWORD compID)
+{
+	return (compID != -1L) ? &(*club_comps)[compID] : NULL;
 }
 
 cm3_club_comps *find_club_comp(const char *szClubComp)

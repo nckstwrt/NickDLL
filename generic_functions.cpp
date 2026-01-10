@@ -20,12 +20,6 @@ void GetCompIDs()
 	SouthernConferenceDivisionCompID = find_club_comp_id("English Southern League Premier Division");
 	ALowerDivisionCompID = find_club_comp_id("A Lower Division");
 
-	if (NorthernConferenceDivisionCompID != -1L)		// If the Northern league is missing a short acronym add one
-	{
-		if (_stricmp((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "") == 0)
-			strcpy((*club_comps)[NorthernConferenceDivisionCompID].ClubCompNameThreeLetter, "NLN");
-	}
-
 	dprintf("GetCompIDs: SecondDivisionCompID = %02X\nThirdDivisionCompID = %02X\nConferenceDivisionCompID = %02X\nNorthernConferenceDivisionCompID = %02X\nSouthernConferenceDivisionCompID = %02X\nALowerDivisionCompID = %02X\n", SecondDivisionCompID, ThirdDivisionCompID, ConferenceDivisionCompID, NorthernConferenceDivisionCompID, SouthernConferenceDivisionCompID, ALowerDivisionCompID);
 }
 
@@ -51,12 +45,13 @@ int AddTeams(BYTE* _this)
 
 
 typedef BYTE*(__thiscall*league_init_typedef)(BYTE* _this, __int16 a2, cm3_club_comps* a3);
-void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DWORD league_init_addr)
+void AddLeague(BYTE* _this, DWORD compID, int leagueNo, int year, DWORD league_init_addr)
 {
-	dprintf("Adding (This: %08X) league %s at slot %d for year %d (calling init addr: %08X).\n", (DWORD)_this, szLeagueName, leagueNo, (short)year, league_init_addr);
-	cm3_club_comps* comp = find_club_comp(szLeagueName);
+	dprintf("Adding (This: %08X) league %X at slot %d for year %d (calling init addr: %08X).\n", (DWORD)_this, compID, leagueNo, (short)year, league_init_addr);
+	cm3_club_comps* comp = get_comp(compID);
 	if (comp)
 	{
+		dprintf("comp name: %s\n", comp->ClubCompName);
 		BYTE* ee_bytes = (BYTE*)sub_944CF1_operator_new(0xEE);
 		league_init_typedef init_call = (league_init_typedef)(league_init_addr);
 		BYTE* leagueSetupPtr = init_call(ee_bytes, (short)*current_year, comp);
@@ -64,7 +59,7 @@ void AddLeague(BYTE* _this, const char* szLeagueName, int leagueNo, int year, DW
 		compPtrTable[leagueNo] = (DWORD)leagueSetupPtr;
 	}
 	else
-		dprintf("Could not find comp %s!", szLeagueName);
+		dprintf("Could not find comp ID %X!", compID);
 }
 
 void AddFixture(BYTE *pMem, int fixture, Date date, int startYear, Day dayOfWeek /* Mon = 0 */, int timeOfDay = 1)
@@ -187,11 +182,17 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 		AddFixture(pMem, fixture++, Date(year + 1, 3, 24), year, Saturday);
 		AddFixture(pMem, fixture++, Date(year + 1, 3, 31), year, Saturday);
 
-		AddFixture(pMem, fixture++, Date(year + 1, 4, 7), year, Saturday);
-		AddFixture(pMem, fixture++, Date(year + 1, 4, 14), year, Saturday);
-		AddFixture(pMem, fixture++, Date(year + 1, 4, 16), year, Monday, 2);
-		AddFixture(pMem, fixture++, Date(year + 1, 4, 21), year, Saturday);
+		if (team_count >= 22)
+		{
+			AddFixture(pMem, fixture++, Date(year + 1, 4, 7), year, Saturday);
+			AddFixture(pMem, fixture++, Date(year + 1, 4, 14), year, Saturday);
+		}
 		
+		if (team_count >= 23)
+		{
+			AddFixture(pMem, fixture++, Date(year + 1, 4, 16), year, Monday, 2);
+			AddFixture(pMem, fixture++, Date(year + 1, 4, 21), year, Saturday);
+		}
 
 		if (team_count >= 24)
 		{
@@ -270,6 +271,24 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 
 			sub_521E60_add_playoff_fixture_call(pMem, 0, 3, 4, 1, 0, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 0, 5, 4, 1, 2, 2, year, 0);
+			
+			*(WORD*)(pMem + 7) = 120;
+			*(WORD*)(pMem + 9) = 0;
+			*(WORD*)(pMem + 11) = 0;
+			*(WORD*)(pMem + 13) = 515;
+			pMem[23] = 5;
+			*((WORD*)pMem + 12) = 4;
+			*((WORD*)pMem + 13) = 2;
+			*((WORD*)pMem + 14) = 4;
+			*(WORD*)(pMem + 15) = 3;
+			*((WORD*)pMem + 15) = 0;
+			pMem[32] = 0;
+			pMem[33] = 1;
+			pMem[34] = 4;
+			*((DWORD*)pMem + 23) = 0;
+			*((DWORD*)pMem + 24) = 0;
+			*((DWORD*)pMem + 25) = 0;
+			/*
 			*(WORD*)(pMem + 7) = 0x78;
 			*(WORD*)(pMem + 9) = 0;
 			*(WORD*)(pMem + 11) = 0;
@@ -285,10 +304,27 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 			pMem[34] = 4;
 			*((DWORD*)pMem + 23) = 0;
 			*((DWORD*)pMem + 24) = 0;
-			*((DWORD*)pMem + 25) = 0;
+			*((DWORD*)pMem + 25) = 0;*/
 
 			sub_521E60_add_playoff_fixture_call(pMem, 1, 6, 4, 1, 3, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 1, 8, 4, 1, 5, 1, year, 0);
+
+			*(WORD*)(pMem + 111) = 130;
+			*(WORD*)(pMem + 113) = 1;
+			*(WORD*)(pMem + 115) = 0;
+			*(WORD*)(pMem + 117) = 1027;
+			pMem[127] = 5;
+			*((WORD*)pMem + 64) = 4;
+			*((WORD*)pMem + 65) = 2;
+			*((WORD*)pMem + 66) = 2;
+			*(WORD*)(pMem + 119) = 3;
+			*((WORD*)pMem + 67) = 4;
+			*(DWORD*)(pMem + 135) = 16842752;
+			*((DWORD*)pMem + 49) = 0;
+			*((DWORD*)pMem + 50) = 0;
+			*((DWORD*)pMem + 51) = 0;
+
+			/*
 			*(WORD*)(pMem + 104 + 7) = 0x82;
 			*(WORD*)(pMem + 104 + 9) = 1;
 			*(WORD*)(pMem + 104 + 11) = 0;
@@ -302,10 +338,29 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 			*(DWORD*)(pMem + 135) = 0x1010000;
 			*((DWORD*)pMem + 49) = 0;
 			*((DWORD*)pMem + 50) = 0;
-			*((DWORD*)pMem + 51) = 0;
+			*((DWORD*)pMem + 51) = 0;*/
 
 			sub_521E60_add_playoff_fixture_call(pMem, 2, 9, 4, 1, 6, year);
 			sub_521EB0_add_playoff_fixture_call(pMem, 2, 15, 4, 1, 5, 1, year, 4);
+
+			*(WORD*)(pMem + 217) = 2;
+			*((WORD*)pMem + 116) = 2;
+			*((WORD*)pMem + 117) = 1;
+			*((WORD*)pMem + 118) = 0;
+			*(WORD*)(pMem + 215) = 150;
+			*(WORD*)(pMem + 219) = 0;
+			*(WORD*)(pMem + 221) = 3;
+			pMem[231] = 5;
+			*(WORD*)(pMem + 223) = 0;
+			*((WORD*)pMem + 119) = 6;
+			pMem[240] = 0;
+			pMem[241] = 1;
+			pMem[242] = 0;
+			*((DWORD*)pMem + 75) = 0;
+			*((DWORD*)pMem + 76) = 0;
+			*((DWORD*)pMem + 77) = 0;
+
+			/*
 			*(WORD*)(pMem + 217) = 2;
 			*((WORD*)pMem + 116) = 2;
 			*((WORD*)pMem + 117) = 1;
@@ -321,7 +376,7 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 			pMem[242] = 0;
 			*((DWORD*)pMem + 75) = 0;
 			*((DWORD*)pMem + 76) = 0;
-			*((DWORD*)pMem + 77) = 0;
+			*((DWORD*)pMem + 77) = 0;*/
 		}
 
 		return (DWORD)pMem;

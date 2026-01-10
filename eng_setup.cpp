@@ -22,12 +22,10 @@ static int(*sub_5E8290)() = (int(*)())(0x5E8290);
 static int(*sub_66F4E0)() = (int(*)())(0x66F4E0);
 static int(*sub_90D130)() = (int(*)())(0x90D130);
 
-const char* szEnglishNorthernPremierDivision = "English Northern Premier League Premier Division";
-const char* szItalianSerieC1A = "Italian Serie C1/A";
-const char* szDanishPremierDivision = "Danish Premier Division";
-
 void sub_64AA70(); // ita_ser_c1a init
 void sub_576DD0_eng_third_init();
+
+BYTE total_eng_leagues = 0xC;		// =A - origina =B - +1 leagues
 
 void __declspec(naked) sub_833750()
 {
@@ -96,7 +94,12 @@ _008337EF:
 	/*00833833*/	mov word ptr ss:[esp+0xC],dx
 	/*00833838*/	test byte ptr ds:[eax+0x11C],0x4
 	/*0083383F*/	je _00833846
-	/*00833841*/	mov dword ptr ds:[esi+0xC],0xB				// Normally 0xA (ecx) for extra leagues/cups
+
+					push eax
+					movzx eax, byte ptr [total_eng_leagues]
+	/*00833841*/	mov dword ptr ds:[esi+0xC],eax				// Normally 0xA (ecx) for extra leagues/cups   <--- added 2 so now C
+					pop eax
+
 	/*00833844*/	jmp _0083384D
 _00833846:
 	/*00833846*/	mov dword ptr ds:[esi+0xC],0x8				// Number of leagues/cups (8 = Default)
@@ -258,7 +261,10 @@ _00833A4F:
 	/*00833A59*/	mov bl,0x4										  // Leagues added counter
 	/*00833A5B*/	mov dword ptr ds:[edx+0xC],eax
 	/*00833A5E*/	mov eax,dword ptr ds:[esi+0xC]
-	/*00833A61*/	cmp eax,0xB										// Normally this would be 0xA - but we've added an extra league
+		
+					cmp al, [total_eng_leagues]
+
+	/*00833A61*/	//cmp eax,0xC										// Normally this would be 0xA - but we've added an extra league - added 2 now 0xC
 	/*00833A64*/	jne _00833ABE_SkipConference
 	/*00833A66*/	push 0xEE
 	/*00833A6B*/	call sub_944CF1_operator_new		/*call <cm0102.sub_944CF1>*/
@@ -293,12 +299,25 @@ _00833AAF_AllGood:
 					push sub_576DD0_eng_third_init // sub_64AA70	// league init function
 					push ebp										// has the year in it
 					push ebx										// league number
-					push szEnglishNorthernPremierDivision			// szEnglishNorthernPremierDivision // szDanishPremierDivision   //szItalianSerieC1A // //szEnglishNorthernPremierDivision	// league name
+					push [NorthernConferenceDivisionCompID]			// CompID
 					push esi										// this pointer
 					call AddLeague
 					add esp, 0x14
 					popad
-					inc bl
+					inc bl											// increment league count
+
+					pushad
+					movsx ebx, bl
+					push sub_576DD0_eng_third_init // sub_64AA70	// league init function
+					push ebp										// has the year in it
+					push ebx										// league number
+					push [SouthernConferenceDivisionCompID]			// CompID
+					push esi										// this pointer
+					call AddLeague
+					add esp, 0x14
+					popad
+					inc bl											// increment league count
+		
 
 _00833ABE_SkipConference:
 	/*00833ABE*/	push 0xB5
@@ -411,7 +430,9 @@ _00833C0F:
 	/*00833C1C*/	inc bl
 	/*00833C1E*/	mov dword ptr ds:[edx+ecx*0x4],eax
 	/*00833C21*/	mov eax,dword ptr ds:[esi+0xC]						
-	/*00833C24*/	cmp eax,0xB											// Normally this would be 0xA - but we've added an extra league
+					
+					cmp al, [total_eng_leagues]
+	/*00833C24*/	//cmp eax,0xC											// Normally this would be 0xA - but we've added an extra league - added 2 now 0xC
 	/*00833C27*/	jne _00833C82
 	/*00833C29*/	push 0xB2
 	/*00833C2E*/	call sub_944CF1_operator_new		/*call <cm0102.sub_944CF1>*/

@@ -43,17 +43,57 @@ enum class LeaguePos : BYTE
 	Relegated = 3
 };
 
+std::vector<cm3_clubs*> get_relegated_teams(DWORD compID)
+{
+	std::vector<cm3_clubs*> relegated_clubs;
+	BYTE* league = get_loaded_league(compID);
+
+	if (league)
+	{
+		BYTE numberOfTeams = league[0x3E];
+		BYTE* teams = (BYTE*)*(DWORD*)(league + 0xB1);
+
+		for (int i = 0; i < numberOfTeams; i++)
+		{
+			DWORD* clubPtr = (DWORD*)(teams + (i * 0x3B));
+			cm3_clubs* club = (cm3_clubs*)*clubPtr;
+			BYTE pos = teams[i * 0x3B + 4];
+			BYTE status = teams[i * 0x3B + 0x37];
+			if (club)
+			{
+				dprintf("club: %d. %s %d %d\n", i, club->ClubName, pos, status);
+				/*
+				for (int j = 0; j < 0x3B; j++)
+					dprintf("%02X ", *(teams + (i * 0x3B) + j));
+				dprintf("\n");
+				*/
+				if (status == (BYTE)LeaguePos::Relegated)
+					relegated_clubs.push_back(club);
+			}
+		}
+	}
+	else
+		dprintf("Can't find relegated clubs at compID: %08X\n", compID);
+	return relegated_clubs;
+}
+
 void __fastcall sub_5750A0_promote_teams_to_bottom_league_c(BYTE *_this)
 {
 	dprintf("sub_5750A0_promote_teams_to_bottom_league_c called - _this: %08X (eng_prm)\n", _this);
 
+	std::vector<cm3_clubs*> northern_relegated_clubs = get_relegated_teams(NorthernConferenceDivisionCompID);
+	std::vector<cm3_clubs*> southern_relegated_clubs = get_relegated_teams(SouthernConferenceDivisionCompID);
+	std::vector<cm3_clubs*> available_clubs;
+	/*
 	BYTE *northernLeague = get_loaded_league(NorthernConferenceDivisionCompID);
-	dprintf("northernLeague: %08X\n", northernLeague);
+	BYTE* southernLeague = get_loaded_league(NorthernConferenceDivisionCompID);
+	dprintf("northernLeague: %08X southernLeague: %08X\n", northernLeague, southernLeague);
 
 	BYTE numberOfTeams = northernLeague[0x3E];
 	BYTE *teams = (BYTE*)*(DWORD*)(northernLeague + 0xB1);
 
-	std::vector<DWORD*> relegated_clubs;
+	std::vector<DWORD*> northern_relegated_clubs;
+	std::vector<DWORD*> southern_relegated_clubs;
 	std::vector<cm3_clubs*> available_clubs;
 
 	for (int i = 0; i < numberOfTeams; i++)
@@ -65,19 +105,28 @@ void __fastcall sub_5750A0_promote_teams_to_bottom_league_c(BYTE *_this)
 		if (club)
 		{
 			dprintf("%d. %s %d %d\n", i, club->ClubName, pos, status);
-			/*
-			for (int j = 0; j < 0x3B; j++)
-			{
-				dprintf("%02X ", *(teams + (i * 0x3B) + j));
-			}
-			dprintf("\n");
-			*/
+			
 			if (status == (BYTE)LeaguePos::Relegated)
-			{
-				relegated_clubs.push_back(clubPtr);
-			}
+				northern_relegated_clubs.push_back(clubPtr);
 		}
 	}
+
+	numberOfTeams = southernLeague[0x3E];
+	teams = (BYTE*)*(DWORD*)(southernLeague + 0xB1);
+
+	for (int i = 0; i < numberOfTeams; i++)
+	{
+		DWORD* clubPtr = (DWORD*)(teams + (i * 0x3B));
+		cm3_clubs* club = (cm3_clubs*)*clubPtr;
+		BYTE pos = teams[i * 0x3B + 4];
+		BYTE status = teams[i * 0x3B + 0x37];
+		if (club)
+		{
+			dprintf("%d. %s %d %d\n", i, club->ClubName, pos, status);
+			if (status == (BYTE)LeaguePos::Relegated)
+				southern_relegated_clubs.push_back(clubPtr);
+		}
+	}*/
 
 	for (int i = 0; i < get_club_count(); i++)
 	{
@@ -104,11 +153,10 @@ void __fastcall sub_5750A0_promote_teams_to_bottom_league_c(BYTE *_this)
 		}
 	}
 
-	for (unsigned int i = 0; i < relegated_clubs.size(); i++)
+	for (unsigned int i = 0; i < northern_relegated_clubs.size(); i++)
 	{
 		int availableIdx = rand() % available_clubs.size();
-		DWORD *clubPtr = relegated_clubs[i];
-		cm3_clubs *clubToRelegate = (cm3_clubs *)*clubPtr;
+		cm3_clubs *clubToRelegate = northern_relegated_clubs[i];
 		cm3_clubs *available = available_clubs[availableIdx];
 
 		dprintf("Swapping Teams: %s (%s) <-> %s (%s)\n", clubToRelegate->ClubName, clubToRelegate->ClubDivision->ClubCompName, available->ClubName, available->ClubDivision->ClubCompName);
@@ -119,8 +167,21 @@ void __fastcall sub_5750A0_promote_teams_to_bottom_league_c(BYTE *_this)
 
 		available_clubs.erase(available_clubs.begin() + availableIdx);
 	}
+		
+	for (unsigned int i = 0; i < southern_relegated_clubs.size(); i++)
+	{
+		int availableIdx = rand() % available_clubs.size();
+		cm3_clubs* clubToRelegate = southern_relegated_clubs[i];
+		cm3_clubs* available = available_clubs[availableIdx];
 
-	GetKey();
+		dprintf("Swapping Teams: %s (%s) <-> %s (%s)\n", clubToRelegate->ClubName, clubToRelegate->ClubDivision->ClubCompName, available->ClubName, available->ClubDivision->ClubCompName);
+
+		cm3_club_comps* tempDivision = available->ClubDivision;
+		available->ClubDivision = clubToRelegate->ClubDivision;
+		clubToRelegate->ClubDivision = tempDivision;
+
+		available_clubs.erase(available_clubs.begin() + availableIdx);
+	}
 }
 
 void __declspec(naked) sub_5750A0_promote_teams_to_bottom_league()
@@ -212,7 +273,9 @@ _0057516B:
 
 					cmp eax, dword ptr ds:[NorthernConferenceDivisionCompID]	// NorthernConferenceDivisionCompID (don't include the Northern Conference Division)
 					je _005751C6
-				
+					cmp eax, dword ptr ds:[SouthernConferenceDivisionCompID]	// SouthernConferenceDivisionCompID (don't include the Southern Conference Division)
+					je _005751C6
+
 	/*005751AB*/	mov eax,dword ptr ds:[edx]
 	/*005751AD*/	mov edx,dword ptr ds:[0x9CF2E4]			// [9cf2e4] = England
 	/*005751B3*/	cmp eax,edx
@@ -359,14 +422,14 @@ void __declspec(naked) sub_eng_prm_574C10()  // eng_prm +8 Func
 	/*00574C1C*/	mov eax,dword ptr ds:[esi]
 	/*00574C1E*/	push 0x1
 	/*00574C20*/	mov dword ptr ds:[esi+0x4C],edi
-	/*00574C23*/	call dword ptr ds:[eax+0xB0]
+	/*00574C23*/	call dword ptr ds:[eax+0xB0]						// <--- calling 0xB0
 	/*00574C29*/	mov ecx,dword ptr ds:[0xADADFC]
 	/*00574C2F*/	mov edx,dword ptr ds:[0x9CF69C]						// [9cf69c] = English Conference
 	/*00574C35*/	mov eax,dword ptr ds:[ecx+edx*0x4]
 	/*00574C38*/	mov ecx,esi
 	/*00574C3A*/	cmp eax,edi
 	/*00574C3C*/	je _00574C45
-	/*00574C3E*/	call sub_5750A0		/*call <cm0102.sub_5750A0>*/
+	/*00574C3E*/	call sub_5750A0		/*call <cm0102.sub_5750A0>*/	// <---- do the conference relegation
 	/*00574C43*/	jmp _00574C4A
 _00574C45:
 	/*00574C45*/	call sub_574E60		/*call <cm0102.sub_574E60>*/
@@ -537,6 +600,14 @@ _00574DE4:
 					mov ecx, dword ptr ds:[ecx + edx * 0x4]
 					mov eax, dword ptr ds:[ecx]
 					call dword ptr ds:[eax+0x8]
+
+		
+					mov ecx, dword ptr ds:[0xADADFC]						
+					mov edx, dword ptr ds:[SouthernConferenceDivisionCompID]
+					mov ecx, dword ptr ds:[ecx + edx * 0x4]
+					mov eax, dword ptr ds:[ecx]
+					call dword ptr ds:[eax+0x8]
+					
 _00574E38:
 	/*00574E38*/	mov ecx,esi
 	/*00574E3A*/	call sub_68AA80		/*call <cm0102.sub_68AA80>*/
@@ -641,14 +712,18 @@ void __declspec(naked) sub_5752E0_eng_prm_promo()
 	/*005753DB*/	mov edx,dword ptr ds:[ecx]
 	/*005753DD*/	call dword ptr ds:[edx+0xA4]
 
-	
 					mov ecx, dword ptr ds:[0xADADFC]
 					mov edx, dword ptr ds:[NorthernConferenceDivisionCompID]		// NorthernConferenceDivisionCompID
 					mov ecx, dword ptr ds:[ecx+edx*0x4]
 					mov eax, dword ptr ds:[ecx]
 					call dword ptr ds:[eax+0xA4]
-	
 
+					mov ecx, dword ptr ds:[0xADADFC]
+					mov edx, dword ptr ds:[SouthernConferenceDivisionCompID]		// SouthernConferenceDivisionCompID
+					mov ecx, dword ptr ds:[ecx + edx * 0x4]
+					mov eax, dword ptr ds:[ecx]
+					call dword ptr ds:[eax + 0xA4]
+					
 	/*005753E3*/	mov ax,word ptr ds:[edi+0xE2]									// edi is 3rd Division ??
 	/*005753EA*/	mov edx,dword ptr ds:[edi+0x4]
 	/*005753ED*/	mov cx,word ptr ds:[edi+0xE4]
@@ -734,6 +809,21 @@ _0057546B:
 					mov ecx, esi
 					call sub_689C80		//call <cm0102.sub_689C80>
 		
+					// Do the promotion and relegation between the two leagues
+					mov eax, dword ptr ds:[0xADADFC]
+					mov ecx, dword ptr ds:[SouthernConferenceDivisionCompID]				// SouthernConferenceDivisionCompID
+					push 0xFFFFFFFF
+					push 0xFFFFFFFF
+					mov edx, dword ptr ds:[eax+ecx*0x4]
+					mov ecx, dword ptr ds:[0x9CF69C]							// [9cf69c] = English Conference
+					push ebx
+					push 0x1
+					push edx
+					mov edx, dword ptr ds:[eax+ecx*0x4]
+					push edx
+					mov ecx, esi
+					call sub_689C80		//call <cm0102.sub_689C80>
+					
 _00575492:
 	/*00575492*/	pop edi
 	/*00575493*/	pop esi
