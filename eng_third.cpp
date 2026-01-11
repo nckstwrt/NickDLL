@@ -54,15 +54,11 @@ void sub_5780C0_set_subs();
 int __fastcall sub_5780C0_set_subs_c(BYTE* _this);		// We cheat with a fastcall here (as the one and only param will be passed as ecx). It's really a __thiscall.
 void sub_577000();
 void sub_578170();
-void sub_578330();
 int __fastcall sub_578330_c(int* _this);				// called by league.cpp on 4th May - Cup related
 void sub_5770E0_add_fixtures();
 void sub_576C50();
-DWORD sub_5783C0();
-void sub_5785B0();
 void sub_578660();
-
-void sub_DE844E_davdav_6playoffs();
+void sub_5785B0();		// +48 vtable;
 
 void __declspec(naked) eng_fixture_caller()		// used as a __thiscall -> __cdecl converter
 {
@@ -2361,7 +2357,7 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 	if (CompID == NorthernConferenceDivisionCompID)
 	{
 		_this[0xBE] = 1;		// Promotion Places
-		_this[0xBF] = 6;		// Play off places
+		_this[0xBF] = 4;		// Play off places
 		_this[0xC1] = 4;		// Relegation places
 
 		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
@@ -2371,7 +2367,7 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 	if (CompID == SouthernConferenceDivisionCompID)
 	{
 		_this[0xBE] = 1;		// Promotion Places
-		_this[0xBF] = 6;		// Play off places
+		_this[0xBF] = 4;		// Play off places
 		_this[0xC1] = 4;		// Relegation places
 
 		*(DWORD*)(_this + 0x1C) = ConferenceDivisionCompID;
@@ -2674,207 +2670,15 @@ int __fastcall sub_578330_c(int* _this)  // called by league.cpp on 4th May
 		_this[12] = result;
 		if (!result)
 		{
-			// if 4 playoffs we call this function, else we need to call davdav's for 6 playoffs
 			BYTE* _thisPtr = (BYTE*)_this;
 			dprintf("sub_578330_c - playoff places: %d\n", _thisPtr[0xBF]);
-			if (_thisPtr[0xBF] == 4)
-				(*(int(__thiscall*)(int*))sub_5783C0)(_this);		// __thiscall sub_5783C0
-			else
-				(*(int(__thiscall*)(int*))sub_DE844E_davdav_6playoffs)(_this);
+			HandlePlayoffSelection((BYTE*)_this);	// Was sub_5783C0 originally or DE844E in davdav for 6 playoff places
 		}
 	}
 	else
 		dprintf("sub_578330_c - Something went wrong!");
 	
 	return result;
-}
-
-void __declspec(naked) sub_578330()	// called by league.cpp on 4th May
-{
-	__asm
-	{
-	/*00578330*/	mov edx,dword ptr ds:[ecx+0x2C]		// =1 ?
-	/*00578333*/	mov eax,dword ptr ds:[ecx+0x30]		// =0xFFFFFFFF
-	/*00578336*/	sub esp,0x200
-	/*0057833C*/	dec edx
-	/*0057833D*/	cmp eax,edx
-	/*0057833F*/	jl _005783AB
-	/*00578341*/	lea eax,dword ptr ss:[esp]
-	/*00578345*/	lea ecx,dword ptr ss:[esp+0x100]
-	/*0057834C*/	push eax
-	/*0057834D*/	push ecx
-	/*0057834E*/	push 0x0
-	/*00578350*/	push 0x0
-	/*00578352*/	push 0x9C4424		/*push cm0102.9C4424*/
-	/*00578357*/	call sub_944CFF_splitpath		/*call cm0102.944CFF*/
-	/*0057835C*/	add esp,0x14
-	/*0057835F*/	lea edx,dword ptr ss:[esp]
-	/*00578363*/	lea eax,dword ptr ss:[esp+0x100]
-	/*0057836A*/	push 0x29C
-	/*0057836F*/	push edx
-	/*00578370*/	push eax
-	/*00578371*/	call sub_90D130		/*call cm0102.90D130*/
-	/*00578376*/	push eax
-	/*00578377*/	push 0x9870E8		/*push cm0102.9870E8*/
-	/*0057837C*/	push 0xAE24D0		/*push cm0102.AE24D0*/
-	/*00578381*/	call sub_944C9F_sprintf		/*call cm0102.944C9F*/
-	/*00578386*/	push 0x0
-	/*00578388*/	push 0xAE24D0		/*push cm0102.AE24D0*/
-	/*0057838D*/	push 0x9870E0		/*push cm0102.9870E0*/
-	/*00578392*/	call sub_5E8290		/*call cm0102.5E8290*/
-	/*00578397*/	add esp,0x24
-	/*0057839A*/	mov dword ptr ds:[0xB67A34],0x0
-	/*005783A4*/	add esp,0x200
-	/*005783AA*/	ret
-_005783AB:
-	/*005783AB*/	inc eax
-	/*005783AC*/	test eax,eax
-	/*005783AE*/	mov dword ptr ds:[ecx+0x30],eax
-	/*005783B1*/	jne _005783B8
-	/*005783B3*/	call sub_5783C0		/*call cm0102.5783C0*/
-_005783B8:
-	/*005783B8*/	add esp,0x200
-	/*005783BE*/	ret
-	}
-}
-DWORD __declspec(naked) sub_5783C0()  // Called by above function. Mainly to call cup_stage.cpp func sub_522E00
-{
-	__asm {
-	/*005783D5*/	sub esp,0x418
-	/*005783DB*/	push esi
-	/*005783DC*/	mov esi,ecx
-	/*005783DE*/	push edi
-	/*005783DF*/	movsx eax,byte ptr ds:[esi+0xBF]
-	/*005783E6*/	shl eax,0x2
-	/*005783E9*/	push eax
-	/*005783EA*/	call sub_944E46_malloc		/*call cm0102.944E46*/
-	/*005783EF*/	mov edi,eax
-	/*005783F1*/	add esp,0x4
-	/*005783F4*/	test edi,edi
-	/*005783F6*/	jne _0057842B
-	/*005783F8*/	lea ecx,dword ptr ss:[esp+0x14]
-	/*005783FC*/	lea edx,dword ptr ss:[esp+0x214]
-	/*00578403*/	push ecx
-	/*00578404*/	push edx
-	/*00578405*/	push eax
-	/*00578406*/	push eax
-	/*00578407*/	push 0x9C4424		/*push cm0102.9C4424*/
-	/*0057840C*/	call sub_944CFF_splitpath		/*call cm0102.944CFF*/
-	/*00578411*/	add esp,0x14
-	/*00578414*/	lea eax,dword ptr ss:[esp+0x14]
-	/*00578418*/	lea ecx,dword ptr ss:[esp+0x214]
-	/*0057841F*/	push 0x2BE
-	/*00578424*/	push eax
-	/*00578425*/	push ecx
-	/*00578426*/	jmp _00578539
-_0057842B:
-	/*0057842B*/	mov edx,dword ptr ds:[esi+0xB1]
-	/*00578431*/	push ebx
-	/*00578432*/	push 0x0
-	/*00578434*/	mov eax,dword ptr ds:[edx+0x162]
-	/*0057843A*/	mov dword ptr ds:[edi],eax
-	/*0057843C*/	mov ecx,dword ptr ds:[esi+0xB1]
-	/*00578442*/	mov edx,dword ptr ds:[ecx+0xB1]
-	/*00578448*/	mov dword ptr ds:[edi+0x4],edx
-	/*0057844B*/	mov eax,dword ptr ds:[esi+0xB1]
-	/*00578451*/	mov ecx,dword ptr ds:[eax+0x127]
-	/*00578457*/	mov dword ptr ds:[edi+0x8],ecx
-	/*0057845A*/	mov edx,dword ptr ds:[esi+0xB1]
-	/*00578460*/	lea ecx,dword ptr ss:[esp+0x10]
-	/*00578464*/	mov eax,dword ptr ds:[edx+0xEC]
-	/*0057846A*/	mov dword ptr ds:[edi+0xC],eax
-	/*0057846D*/	mov edx,dword ptr ds:[esi]
-	/*0057846F*/	lea eax,dword ptr ss:[esp+0x14]
-	/*00578473*/	push eax
-	/*00578474*/	push ecx
-	/*00578475*/	push 0x0
-	/*00578477*/	mov ecx,esi
-	/*00578479*/	call dword ptr ds:[edx+0x3C]
-	/*0057847C*/	push 0xB2
-	/*00578481*/	mov ebx,eax
-	/*00578483*/	call sub_944CF1		/*call cm0102.944CF1*/
-	/*00578488*/	add esp,0x4
-	/*0057848B*/	mov dword ptr ss:[esp+0x14],eax
-	/*0057848F*/	test eax,eax
-	/*00578491*/	mov dword ptr ss:[esp+0x420],0x0
-	/*0057849C*/	je _005784D4
-	/*0057849E*/	mov edx,dword ptr ss:[esp+0x10]
-	/*005784A2*/	mov cx,word ptr ds:[esi+0x40]
-	/*005784A6*/	push 0x0
-	/*005784A8*/	push 0x0
-	/*005784AA*/	push 0x0
-	/*005784AC*/	push 0x0
-	/*005784AE*/	push 0x14
-	/*005784B0*/	push edx
-	/*005784B1*/	mov edx,dword ptr ds:[esi+0x4]
-	/*005784B4*/	push 0x1
-	/*005784B6*/	push 0x0
-	/*005784B8*/	push ecx
-	/*005784B9*/	mov ecx,dword ptr ss:[esp+0x30]
-	/*005784BD*/	push ebx
-	/*005784BE*/	push edx
-	/*005784BF*/	push ecx
-	/*005784C0*/	movsx dx,byte ptr ds:[esi+0xBF]
-	/*005784C8*/	push edi
-	/*005784C9*/	push edx
-	/*005784CA*/	push esi
-	/*005784CB*/	mov ecx,eax
-	/*005784CD*/	call sub_522E00		/*call cm0102.522E00*/
-	/*005784D2*/	jmp _005784D6
-_005784D4:
-	/*005784D4*/	xor eax,eax
-_005784D6:
-	/*005784D6*/	mov ecx,dword ptr ds:[esi+0xC]
-	/*005784D9*/	push edi
-	/*005784DA*/	mov dword ptr ss:[esp+0x424],0xFFFFFFFF
-	/*005784E5*/	mov dword ptr ds:[ecx],eax
-	/*005784E7*/	call sub_9452CA		/*call cm0102.9452CA*/
-	/*005784EC*/	push ebx
-	/*005784ED*/	call sub_9452CA		/*call cm0102.9452CA*/
-	/*005784F2*/	mov edx,dword ptr ds:[esi+0xC]
-	/*005784F5*/	add esp,0x8
-	/*005784F8*/	mov ecx,dword ptr ds:[edx]
-	/*005784FA*/	pop ebx
-	/*005784FB*/	test ecx,ecx
-	/*005784FD*/	jne _00578583
-	/*00578503*/	lea eax,dword ptr ss:[esp+0x114]
-	/*0057850A*/	lea ecx,dword ptr ss:[esp+0x314]
-	/*00578511*/	push eax
-	/*00578512*/	push ecx
-	/*00578513*/	push 0x0
-	/*00578515*/	push 0x0
-	/*00578517*/	push 0x9C4424		/*push cm0102.9C4424*/
-	/*0057851C*/	call sub_944CFF_splitpath		/*call cm0102.944CFF*/
-	/*00578521*/	add esp,0x14
-	/*00578524*/	lea edx,dword ptr ss:[esp+0x114]
-	/*0057852B*/	lea eax,dword ptr ss:[esp+0x314]
-	/*00578532*/	push 0x2D5
-	/*00578537*/	push edx
-	/*00578538*/	push eax
-_00578539:
-	/*00578539*/	call sub_90D130		/*call cm0102.90D130*/
-	/*0057853E*/	push eax
-	/*0057853F*/	push 0x9870E8		/*push cm0102.9870E8*/
-	/*00578544*/	push 0xAE24D0		/*push cm0102.AE24D0*/
-	/*00578549*/	call sub_944C9F_sprintf		/*call cm0102.944C9F*/
-	/*0057854E*/	push 0x0
-	/*00578550*/	push 0xAE24D0		/*push cm0102.AE24D0*/
-	/*00578555*/	push 0x9870E0		/*push cm0102.9870E0*/
-	/*0057855A*/	call sub_5E8290		/*call cm0102.5E8290*/
-	/*0057855F*/	add esp,0x24
-	/*00578562*/	mov dword ptr ds:[0xB67A34],0x0
-	/*0057856C*/	pop edi
-	/*0057856D*/	pop esi
-	/*0057857C*/	add esp,0x418
-	/*00578582*/	ret
-_00578583:
-	/*00578583*/	push 0x0
-	/*00578585*/	call sub_51C800		/*call cm0102.51C800*/
-	/*00578591*/	pop edi
-	/*00578592*/	pop esi
-	/*0057859A*/	add esp,0x418
-	/*005785A0*/	ret
-	}
 }
 
 void __declspec(naked) sub_5785B0()		// +48 vtable
@@ -3069,7 +2873,6 @@ _00578762:
 	}
 }
 
-
 void __declspec(naked) sub_48CE10_force_league_init()
 {
 	__asm 
@@ -3119,109 +2922,6 @@ _0048CE56:
 	/*0048CE56*/	mov al,0x1
 	/*0048CE58*/	pop esi
 	/*0048CE59*/	ret
-	}
-}
-
-void __declspec(naked) sub_DE844E_davdav_6playoffs()
-{
-	__asm
-	{
-	/*00DE844E*/	mov eax,dword ptr fs:[0x0]
-	/*00DE8454*/	push 0xFFFFFFFF
-	/*00DE8456*/	push 0x95845E		/*push <cm0102.sub_95845E>*/
-	/*00DE845B*/	push eax
-	/*00DE845C*/	mov dword ptr fs:[0x0],esp
-	/*00DE8463*/	sub esp,0x40C
-	/*00DE8469*/	push esi
-	/*00DE846A*/	mov esi,ecx
-	/*00DE846C*/	push edi
-	/*00DE846D*/	movsx eax,byte ptr ds:[esi+0xBF]
-	/*00DE8474*/	shl eax,0x2
-	/*00DE8477*/	push eax
-	/*00DE8478*/	call sub_944E46		/*call <cm0102.sub_944E46>*/
-	/*00DE847D*/	mov edi,eax
-	/*00DE847F*/	add esp,0x4
-	/*00DE84B9*/	mov edx,dword ptr ds:[esi+0xB1]
-	/*00DE84BF*/	push ebx
-	/*00DE84C0*/	push 0x0
-	/*00DE84C2*/	mov eax,dword ptr ds:[edx+0x162]
-	/*00DE84C8*/	mov dword ptr ds:[edi],eax
-	/*00DE84CA*/	mov ecx,dword ptr ds:[esi+0xB1]
-	/*00DE84D0*/	mov edx,dword ptr ds:[ecx+0xB1]
-	/*00DE84D6*/	mov dword ptr ds:[edi+0x4],edx
-	/*00DE84D9*/	mov eax,dword ptr ds:[esi+0xB1]
-	/*00DE84DF*/	mov ecx,dword ptr ds:[eax+0x127]
-	/*00DE84E5*/	mov dword ptr ds:[edi+0x8],ecx
-	/*00DE84E8*/	mov edx,dword ptr ds:[esi+0xB1]
-	/*00DE84EE*/	mov eax,dword ptr ds:[edx+0xEC]
-	/*00DE84F4*/	mov dword ptr ds:[edi+0xC],eax
-	/*00DE84F7*/	mov ecx,dword ptr ds:[esi+0xB1]
-	/*00DE84FD*/	mov edx,dword ptr ds:[ecx+0x3B]
-	/*00DE8500*/	mov dword ptr ds:[edi+0x10],edx
-	/*00DE8503*/	mov eax,dword ptr ds:[esi+0xB1]
-	/*00DE8509*/	lea ecx,dword ptr ss:[esp+0x10]
-	/*00DE850D*/	mov edx,dword ptr ds:[eax+0x76]
-	/*00DE8510*/	mov dword ptr ds:[edi+0x14],edx
-	/*00DE8513*/	mov edx,dword ptr ds:[esi]
-	/*00DE8515*/	lea eax,dword ptr ss:[esp+0x14]
-	/*00DE8519*/	push eax
-	/*00DE851A*/	push ecx
-	/*00DE851B*/	push 0x0
-	/*00DE851D*/	mov ecx,esi
-	/*00DE851F*/	call dword ptr ds:[edx+0x3C]
-	/*00DE8522*/	push 0xB2
-	/*00DE8527*/	mov ebx,eax
-	/*00DE8529*/	call sub_944CF1		/*call <cm0102.sub_944CF1>*/
-	/*00DE852E*/	add esp,0x4
-	/*00DE8531*/	mov dword ptr ss:[esp+0x14],eax
-	/*00DE8535*/	test eax,eax
-	/*00DE8537*/	mov dword ptr ss:[esp+0x420],0x0
-	/*00DE8542*/	je _00DE857A
-	/*00DE8544*/	mov edx,dword ptr ss:[esp+0x10]
-	/*00DE8548*/	mov cx,word ptr ds:[esi+0x40]
-	/*00DE854C*/	push 0x0
-	/*00DE854E*/	push 0x0
-	/*00DE8550*/	push 0x0
-	/*00DE8552*/	push 0x0
-	/*00DE8554*/	push 0x14
-	/*00DE8556*/	push edx
-	/*00DE8557*/	mov edx,dword ptr ds:[esi+0x4]
-	/*00DE855A*/	push 0x1
-	/*00DE855C*/	push 0x0
-	/*00DE855E*/	push ecx
-	/*00DE855F*/	mov ecx,dword ptr ss:[esp+0x30]
-	/*00DE8563*/	push ebx
-	/*00DE8564*/	push edx
-	/*00DE8565*/	push ecx
-	/*00DE8566*/	movsx dx,byte ptr ds:[esi+0xBF]
-	/*00DE856E*/	push edi
-	/*00DE856F*/	push edx
-	/*00DE8570*/	push esi
-	/*00DE8571*/	mov ecx,eax
-	/*00DE8573*/	call sub_522E00		/*call <cm0102.sub_522E00>*/
-	/*00DE8578*/	jmp _00DE857C
-_00DE857A:
-	/*00DE857A*/	xor eax,eax
-_00DE857C:
-	/*00DE857C*/	mov ecx,dword ptr ds:[esi+0xC]
-	/*00DE857F*/	push edi
-	/*00DE8580*/	mov dword ptr ss:[esp+0x424],0xFFFFFFFF
-	/*00DE858B*/	mov dword ptr ds:[ecx],eax
-	/*00DE858D*/	call sub_9452CA		/*call <cm0102.sub_9452CA>*/
-	/*00DE8592*/	push ebx
-	/*00DE8593*/	call sub_9452CA		/*call <cm0102.sub_9452CA>*/
-	/*00DE8598*/	mov edx,dword ptr ds:[esi+0xC]
-	/*00DE859B*/	add esp,0x8
-	/*00DE859E*/	mov ecx,dword ptr ds:[edx]
-	/*00DE85A0*/	pop ebx
-	/*00DE8629*/	push 0x0
-	/*00DE862B*/	call sub_51C800		/*call <cm0102.sub_51C800>*/
-	/*00DE8630*/	mov ecx,dword ptr ss:[esp+0x414]
-	/*00DE8637*/	pop edi
-	/*00DE8638*/	pop esi
-	/*00DE8639*/	mov dword ptr fs:[0x0],ecx
-	/*00DE8640*/	add esp,0x418
-	/*00DE8646*/	ret
 	}
 }
 

@@ -433,3 +433,70 @@ _00689C73:
 	/*00689C77*/	ret 0x4
 	}
 }
+
+static void (*sub_9452CA_free)(LPVOID lpMem) = (void(*)(LPVOID))(0x9452CA);
+static int(__thiscall* sub_51C800_call)(BYTE* _this, DWORD val) = (int(__thiscall*)(BYTE * _this, DWORD val))(0x51C800);
+static int(*sub_522E00)() = (int(*)())(0x522E00);
+
+int __fastcall HandlePlayoffSelection(BYTE *_this)
+{
+  void *v5; // ebx
+  DWORD v6; // eax
+  DWORD *v7; // ecx
+  WORD v12 = 0; // [esp+10h] [ebp-418h] BYREF
+  WORD v13 = 0; // [esp+14h] [ebp-414h] BYREF
+  int v19; // [esp+424h] [ebp-4h]
+
+  BYTE promotionPlaces = _this[0xBE];
+  BYTE playoffPlaces = _this[0xBF];
+  BYTE *pMem = (BYTE*)sub_944E46_malloc(4 * playoffPlaces);
+
+  DWORD promotionPlacesOffset = promotionPlaces * 59;
+  *(DWORD*)(pMem) = *(DWORD *)(*(DWORD *)(_this + 0xB1) + promotionPlacesOffset + (6 * 59));
+  *(DWORD*)(pMem + 4) = *(DWORD *)(*(DWORD *)(_this + 0xB1) + promotionPlacesOffset + (3 * 59));
+  *(DWORD*)(pMem + 8) = *(DWORD *)(*(DWORD *)(_this + 0xB1) + promotionPlacesOffset + (5 * 59));
+  *(DWORD*)(pMem + 12) = *(DWORD *)(*(DWORD *)(_this + 0xB1) + promotionPlacesOffset + (4 * 59));
+  if (playoffPlaces >=6)
+  {
+	  *(DWORD*)(pMem + 16) = *(DWORD*)(*(DWORD*)(_this + 0xB1) + (1 * 59));
+	  *(DWORD*)(pMem + 20) = *(DWORD*)(*(DWORD*)(_this + 0xB1) + (2 * 59));
+  }
+  
+  v5 = (void *)(*(int (__thiscall **)(BYTE *, BYTE, WORD *, WORD *, DWORD))(*(DWORD *)_this + 0x3C))(			// 0x3C is fixtures
+                 _this,
+                 0,
+                 &v12,
+                 &v13,
+                 0);
+
+  BYTE *v14 = (BYTE *)sub_944CF1_operator_new(0xB2);
+  v19 = 0;
+  if ( v14 )
+  {
+	  v6 = ((DWORD(__thiscall*)(BYTE*, BYTE*, WORD, BYTE*, WORD, DWORD, void*, WORD, BYTE, BYTE, WORD, BYTE, DWORD, DWORD, DWORD, DWORD))sub_522E00)(
+			 v14,
+			 _this,
+			 playoffPlaces,
+			 pMem,
+			 v12,
+			 *((DWORD*)_this + 1),
+			 v5,
+			 *((WORD*)_this + 0x20),
+			 0,
+			 1,
+			 v13,
+			 20,
+			 0,
+			 0,
+			 0,
+			 0);
+  }
+  else
+    v6 = 0;
+  v7 = (DWORD*)*(DWORD*)(_this + 0xC);
+  v19 = -1;
+  *v7 = (DWORD)v6;
+  sub_9452CA_free(pMem);	// Mem Free
+  sub_9452CA_free(v5);	// Mem Free
+  return sub_51C800_call((BYTE*)v6, 0);
+}
