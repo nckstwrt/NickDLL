@@ -70,11 +70,9 @@ void AddFixture(BYTE *pMem, int fixture, Date date, int startYear, Day dayOfWeek
 
 DWORD GenericAddTeamFixtures(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
 {
-	dprintf("GenericAddTeamFixtures\n");
+	dprintf("Using GenericAddTeamFixtures\n");
 	cm3_club_comps *comp = (cm3_club_comps *)*((DWORD*)(_this + 4));
-	DWORD CompID = *(DWORD*)*((DWORD*)(_this + 4));
 	int team_count = CountNumberOfTeamsInComp(comp->ClubCompID);
-	dprintf("CompID: %08X Name: %s Team Count: %d\n", comp->ClubCompID, comp->ClubCompName, team_count);
 
 	if (a2 == 0xFF)	// -1
 	{
@@ -104,6 +102,10 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 	const char *szCompName = (const char *)(*((DWORD*)(_this + 4))+4);
 	int team_count = CountNumberOfTeamsInComp(CompID);
 	dprintf("CompID: %08X Name: %s Team Count: %d\n", CompID, szCompName, team_count);
+
+	// HACK: if less than 20 teams just use the generic fixture adder
+	if (team_count < 20)
+		return GenericAddTeamFixtures(_this, a2, a3, a4, a5);
 
 	if (a2 == 0xFF)	// -1
 	{

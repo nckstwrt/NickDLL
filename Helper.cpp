@@ -116,11 +116,12 @@ cm3_club_comps *get_comp(DWORD compID)
 	return (compID != -1L) ? &(*club_comps)[compID] : NULL;
 }
 
-cm3_club_comps *find_club_comp(const char *szClubComp)
+cm3_club_comps *find_club_comp(const char *szClubComp, const char* szClubCompAlternative)
 {
 	for (int i = 0; i < *club_comps_count; i++)
 	{
-		if (stricmp((*club_comps)[i].ClubCompName, szClubComp) == 0)
+		if (stricmp((*club_comps)[i].ClubCompName, szClubComp) == 0 || 
+			(szClubCompAlternative && stricmp((*club_comps)[i].ClubCompName, szClubCompAlternative) == 0))
 			return &(*club_comps)[i];
 	}
 	return NULL;
@@ -129,9 +130,7 @@ cm3_club_comps *find_club_comp(const char *szClubComp)
 DWORD find_club_comp_id(const char* szClubComp, const char* szClubCompAlternative)
 {
 	DWORD CompID = -1L;
-	cm3_club_comps* comp = find_club_comp(szClubComp);
-	if (!comp && szClubCompAlternative)
-		comp = find_club_comp(szClubCompAlternative);
+	cm3_club_comps* comp = find_club_comp(szClubComp, szClubCompAlternative);
 	if (comp)
 		CompID = comp->ClubCompID;
 	return CompID;

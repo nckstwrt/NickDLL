@@ -20,7 +20,7 @@ BYTE *get_loaded_league(DWORD compID);
 cm3_nations *find_country(const char *szCountry);
 cm3_clubs* find_club(const char *szClub);
 cm3_club_comps* get_comp(DWORD compID);
-cm3_club_comps* find_club_comp(const char *szClubComp);
+cm3_club_comps* find_club_comp(const char *szClubComp, const char* szClubCompAlternative = NULL);
 DWORD find_club_comp_id(const char* szClubComp, const char* szClubCompAlternative = NULL);
 vector<cm3_club_comps*> find_club_comps_of_nation(const char *szNation);
 
