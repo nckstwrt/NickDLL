@@ -12,6 +12,7 @@ DWORD *clubs_count = (DWORD *)0xAE235C;
 cm3_club_comps **club_comps = (cm3_club_comps **)0xAE23D0;
 DWORD *club_comps_count = (DWORD *)0xAE2378;
 
-DWORD *current_year = (DWORD*)0xAE2C92;
+DWORD *current_date = (DWORD*)0xAE2C90;
+WORD *current_year = (WORD*)0xAE2C92;
 
 DWORD** loaded_leagues = (DWORD**)0xADADFC;

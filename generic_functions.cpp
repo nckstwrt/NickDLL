@@ -68,6 +68,34 @@ void AddFixture(BYTE *pMem, int fixture, Date date, int startYear, Day dayOfWeek
 	sub_68A1C0_add_fixture_call(pMem, fixture, 0, -1, -1, -1, 0);
 }
 
+DWORD GenericAddTeamFixtures(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
+{
+	dprintf("GenericAddTeamFixtures\n");
+	cm3_club_comps *comp = (cm3_club_comps *)*((DWORD*)(_this + 4));
+	DWORD CompID = *(DWORD*)*((DWORD*)(_this + 4));
+	int team_count = CountNumberOfTeamsInComp(comp->ClubCompID);
+	dprintf("CompID: %08X Name: %s Team Count: %d\n", comp->ClubCompID, comp->ClubCompName, team_count);
+
+	if (a2 == 0xFF)	// -1
+	{
+		if (a5)
+			*a5 = 1;
+		*a3 = (team_count - 1) * 2;
+		*a4 = 0;
+		BYTE* pMem = (BYTE*)sub_944E46_malloc((*a3) * 65);	// Allocate memory for fixtures
+		WORD year = *(WORD*)(_this + 0x40);
+
+		Date date(year, August, 12);
+		for (WORD i = 0; i < *a3; i++)
+		{
+			AddFixture(pMem, i, date, year, Saturday);
+			date.addDays(7);
+		}
+		return (DWORD)pMem;
+	}
+	return 0;
+}
+
 DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5)
 {
 	dprintf("add_eng_24team_fixtures_with_playoffs called with this=%08X a2=%02X, a3=%08X, a4=%08X, a5=%08X\n", _this, a2, a3, a4, a5);
@@ -177,10 +205,18 @@ DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4,
 
 		AddFixture(pMem, fixture++, Date(year + 1, 3, 3), year, Saturday);
 		AddFixture(pMem, fixture++, Date(year + 1, 3, 7), year, Tuesday, 2);
-		AddFixture(pMem, fixture++, Date(year + 1, 3, 10), year, Saturday);
-		AddFixture(pMem, fixture++, Date(year + 1, 3, 17), year, Monday, 2);
-		AddFixture(pMem, fixture++, Date(year + 1, 3, 24), year, Saturday);
-		AddFixture(pMem, fixture++, Date(year + 1, 3, 31), year, Saturday);
+
+		if (team_count >= 20)
+		{
+			AddFixture(pMem, fixture++, Date(year + 1, 3, 10), year, Saturday);
+			AddFixture(pMem, fixture++, Date(year + 1, 3, 17), year, Monday, 2);
+		}
+		
+		if (team_count >= 21)
+		{
+			AddFixture(pMem, fixture++, Date(year + 1, 3, 24), year, Saturday);
+			AddFixture(pMem, fixture++, Date(year + 1, 3, 31), year, Saturday);
+		}
 
 		if (team_count >= 22)
 		{

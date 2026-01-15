@@ -209,61 +209,74 @@ struct cm3_clubs
 };
 #pragma pack(pop)
 
+enum CompetitionType : char {
+	CLUB_DOMESTIC = 1,
+	CLUB_INTERNATITONAL = 2,
+	NATION_INTERNATIONAL = 4
+};
+
 
 #pragma pack(push, 1)
 typedef struct comp
 {
-	unsigned int* competitions_off;					//0
-	unsigned int competition_db;					//4	
-	char* unknown;									//8
-	char pad44[16];									//28
-	int f28;										//32
-	int f32;										//36
+	DWORD* comp_vtable;								//0
+	CM3_CLUB_COMPS* competition_db;					//4	
+	DWORD* f8;										//8
+	DWORD* stages;									//12
+	char pad16[12];									//16
+	long promotes_to;								//28
+	long relegates_to;								//32
+	long f36;										//36
 	char pad40[4];									//40
-	unsigned int f40;								//44
-	int f44;										//48
-	int f48;										//52
-	char pad58[6];									//58
-	unsigned short f58;								//60
-	unsigned short rounds;							//62
-	unsigned short teams;							//64
-	unsigned short year;							//66
-	char f66;										//67
-	char f67;										//68
-	char f68;										//69
-	char pad73[4];									//73
-	char max_bench;									//74
-	char max_subs;									//75
-	char pad80[5];									//80
-	char f80;										//81
-	char f81;										//82
-	char f82;										//83
-	char padx[84];									//167
-	unsigned short f167;
-	unsigned short f169;							//171
-	unsigned short f171;							//173
-	unsigned int pad177;							//177
-	unsigned char* team_league_dta;					//181
-	char pad186[5];									//186
-	int f186;										//190
-	char promotion;
-	char prom_playoff;
-	char f193;
-	char relegations;
-	char f194;
-	char f195;
-	char f196;
-	char f197;
-	char f198;
-	char f199;										//199
-	char pad217[17];								//217
-	short f217;										//219
-	short f219;										//221
-	unsigned int f221;								//225
-	char f225;										//226
-	char pad237[11];								//237
-	unsigned char lastchar;
-} comp_s;
+	long num_stages;								//44
+	long current_stage;								//48
+	char pad48[6];									//52
+	WORD n_games;									//58
+	WORD n_rounds;									//60
+	WORD n_teams;									//62
+	WORD year;										//64
+	CompetitionType comp_type;						//66
+	char f67;										//67
+	char f68;										//68
+	DWORD f69;										//69
+	char max_bench;									//73
+	char max_subs;									//74
+	char f75;										//75
+	DWORD* f76;										//76
+	char rules;										//80
+	char f81;										//81
+	char f82;										//82
+	char tmp_file_name[80];							//83
+	BYTE* rounds_list;								//163
+	DWORD* teams_list;								//167
+	char f171;										//171
+	char f172;										//172
+	DWORD* f173;									//173
+	DWORD* team_league_table;						//177
+	char pad181[5];									//181
+	DWORD* fixtures_table;							//186
+	char promotions;								//190
+	char prom_playoff;								//191
+	char rele_playoff;								//192
+	char relegations;								//193
+	char pts_for_win;								//194
+	char pts_for_draw;								//195
+	char f196;										//196
+	char tiebreaker_1;								//197
+	char tiebreaker_2;								//198
+	char tiebreaker_3;								//199
+	char pad200[17];								//200
+	short f217;										//217
+	short f219;										//219
+	unsigned int f221;								//221
+	char f225;										//225
+	short min_stadium_capacity;						//226
+	short min_stadium_seats;						//228
+	char pad230[7];									//230
+	unsigned char f237;								//237
+	DWORD* teams2;									//238
+	WORD n_teams2;									//242
+} comp_stats;
 #pragma pack(pop)
 
 #pragma pack(push, 1)
@@ -299,4 +312,5 @@ extern DWORD *club_comps_count;
 
 extern DWORD **loaded_leagues;
 
-extern DWORD* current_year;
+extern DWORD* current_date;
+extern WORD* current_year;

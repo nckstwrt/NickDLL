@@ -144,7 +144,7 @@
     <ClCompile Include="generic_functions.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="ita_ser_c1a.cpp" />
-    <ClCompile Include="LeagueSelect.cpp" />
+    <ClCompile Include="NationSelect.cpp" />
     <ClCompile Include="NickDLL.cpp" />
     <ClCompile Include="sudamericana.cpp" />
     <ClCompile Include="tapani_relegation_patch.cpp" />

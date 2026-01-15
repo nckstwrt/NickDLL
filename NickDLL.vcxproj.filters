@@ -27,7 +27,7 @@
     <ClCompile Include="Helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LeagueSelect.cpp">
+    <ClCompile Include="NationSelect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NickDLL.cpp">

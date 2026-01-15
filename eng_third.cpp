@@ -77,6 +77,22 @@ void __declspec(naked) eng_fixture_caller()		// used as a __thiscall -> __cdecl 
 	}
 }
 
+void __declspec(naked) generic_fixture_caller()		// used as a __thiscall -> __cdecl converter
+{
+	__asm
+	{
+		mov eax, esp
+		push dword ptr[eax + 0x10]
+		push dword ptr[eax + 0xC]
+		push dword ptr[eax + 0x8]
+		push dword ptr[eax + 0x4]
+		push ecx
+		call GenericAddTeamFixtures
+		add esp, 0x14
+		ret 0x10
+	}
+}
+
 /*
 eng_third VTable at 00969E84:
 0. 00 = 00577000
@@ -2322,8 +2338,8 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 	_this[0xC5] = 1;
 	_this[0xC6] = 2;
 	_this[0xC7] = 3;
-	_this[0xBE] = 3;		// Promotion Places
-	_this[0xBF] = 4;		// Play off places
+	_this[0xBE] = 1;		// Promotion Places
+	_this[0xBF] = 0;		// Play off places
 	_this[0xC0] = 0;		// Relegation Play off places
 	_this[0xC1] = 1;		// Relegation places
 
@@ -2380,6 +2396,14 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 
 	//call vtable +3C which is actually add fixtures function
 	DWORD v1 = *(DWORD*)_this;
+
+	// HACK: if less than 20 teams just the generic caller and override the eng24 one
+	int team_count = CountNumberOfTeamsInComp(CompID);
+	if (team_count < 20)
+	{
+		*(DWORD*)(v1 + 0x3C) = (DWORD)&generic_fixture_caller;
+	}
+
 	*(DWORD*)(_this + 0xBA) = (*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0xA9, _this + 0x3A, 0);		// Fixtures saved to 0xBA
 	
 	return 1;
