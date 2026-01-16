@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <vector>
+#include "CMHeader.h"
 #include "Helper.h"
 
 class LeagueInfo
@@ -15,7 +16,9 @@ public:
 	BYTE RelegationPlayOffPlaces = 0;
 	BYTE RelegationPlaces = 0;
 	DWORD SetupFunction = 0;
-	DWORD CompID = -1L;
+	cm3_club_comps* Comp = NULL;
+	cm3_club_comps* PromotionComp = NULL;
+	cm3_club_comps* RelegationComp = NULL;
 };
 
 class NationLeagueInfo
@@ -30,6 +33,7 @@ public:
 
 NationLeagueInfo* add_nation_league_info(const char* nationName);
 NationLeagueInfo* get_nation_league_info(const char* nationName);
+LeagueInfo* get_league_info(DWORD CompID);
 
 void SetupNationLeagueInfo();
 

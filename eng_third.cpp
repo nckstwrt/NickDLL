@@ -7,9 +7,9 @@
 #include "Helper.h"
 #include "vtable.h"
 #include "generic_functions.h"
+#include "LeagueInfo.h"
 
 static int(*sub_48C6D0)() = (int(*)())(0x48C6D0);
-static int(*sub_49EE70)() = (int(*)())(0x49EE70);
 static int(*sub_49F450)() = (int(*)())(0x49F450);
 static int(*sub_4A1C50)() = (int(*)())(0x4A1C50);
 static int(*sub_4A4850)() = (int(*)())(0x4A4850);
@@ -21,18 +21,13 @@ static int(*sub_521EB0)() = (int(*)())(0x521EB0);
 static int(*sub_522E00)() = (int(*)())(0x522E00);
 static int(*sub_5E8290)() = (int(*)())(0x5E8290);
 static int(*sub_66F4E0)() = (int(*)())(0x66F4E0);
-static int(*sub_682200)() = (int(*)())(0x682200);
 static int(*sub_682300)() = (int(*)())(0x682300);
-static int(*sub_6827D0)() = (int(*)())(0x6827D0);
 static int(*sub_682F70)() = (int(*)())(0x682F70);
 static int(*sub_683010)() = (int(*)())(0x683010);
-static int(*sub_6835C0)() = (int(*)())(0x6835C0);
 static int(*sub_687430)() = (int(*)())(0x687430);
 static int(*sub_687970)() = (int(*)())(0x687970);
-static int(*sub_687B10)() = (int(*)())(0x687B10);
 static int(*sub_68A160)() = (int(*)())(0x68A160);
 static int(*sub_68A1C0)() = (int(*)())(0x68A1C0);
-static int(*sub_68A850)() = (int(*)())(0x68A850);
 static int(*sub_68AA80)() = (int(*)())(0x68AA80);
 static int(*sub_79CEE0)() = (int(*)())(0x79CEE0);
 static int(*sub_868C50)() = (int(*)())(0x868C50);
@@ -47,6 +42,13 @@ static int(*sub_944CF1)() = (int(*)())(0x944CF1);
 static int(*sub_944CFF)() = (int(*)())(0x944CFF);
 static int(*sub_944E46)() = (int(*)())(0x944E46);
 static int(*sub_9452CA)() = (int(*)())(0x9452CA);  // Free?
+
+static int(__thiscall* sub_682200)(BYTE* _this) = (int(__thiscall*)(BYTE * _this))(0x682200);
+static int(__thiscall* sub_687B10)(BYTE* _this, char a2) = (int(__thiscall*)(BYTE * _this, char a2))(0x687B10);
+static int(__thiscall* sub_6835C0)(BYTE* _this) = (int(__thiscall*)(BYTE * _this))(0x6835C0);
+static int(__thiscall* sub_6827D0)(BYTE* _this, BYTE* base) = (int(__thiscall*)(BYTE * _this, BYTE * base))(0x6827D0);
+static int(__thiscall* sub_49EE70)(BYTE* _this, BYTE* base) = (int(__thiscall*)(BYTE * _this, BYTE * base))(0x49EE70);
+static int(__thiscall* sub_68A850)(BYTE* _this) = (int(__thiscall*)(BYTE * _this))(0x68A850);
 
 void sub_577020();
 int __fastcall sub_5780C0_set_subs_c(BYTE* _this);		// We cheat with a fastcall here (as the one and only param will be passed as ecx). It's really a __thiscall.
@@ -68,22 +70,6 @@ void __declspec(naked) eng_fixture_caller()		// used as a __thiscall -> __cdecl 
 		push dword ptr[eax + 0x4]
 		push ecx
 		call AddEng24TeamFixturesWithPlayoffs
-		add esp, 0x14
-		ret 0x10
-	}
-}
-
-void __declspec(naked) generic_fixture_caller()		// used as a __thiscall -> __cdecl converter
-{
-	__asm
-	{
-		mov eax, esp
-		push dword ptr[eax + 0x10]
-		push dword ptr[eax + 0xC]
-		push dword ptr[eax + 0x8]
-		push dword ptr[eax + 0x4]
-		push ecx
-		call GenericAddTeamFixtures
 		add esp, 0x14
 		ret 0x10
 	}
@@ -125,7 +111,7 @@ eng_prm.cpp VTable at 00969D1C:
 // B0 = Could this be the relegation one?
 
 // Normally at: 0x969E84
-vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, /*+28*/ (DWORD)&sub_578330_c, 0x684640, (DWORD)&eng_fixture_caller, /*+44*/ (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, (DWORD)&sub_689C20_relegation_hook, 0x5788C0, 0x579610);
+vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, /*+28*/ (DWORD)&sub_578330_c, 0x684640, (DWORD)&eng_fixture_caller, /*+44*/ (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, -1L /*(DWORD)&sub_689C20_relegation_hook*/, 0x5788C0, 0x579610);
 
 void __declspec(naked) sub_576C50()	//+44
 {
@@ -298,6 +284,44 @@ void eng_third_init_additional()
 		if (_stricmp(get_comp(SouthernConferenceDivisionCompID)->ClubCompNameThreeLetter, "") == 0)
 			strcpy(get_comp(SouthernConferenceDivisionCompID)->ClubCompNameThreeLetter, "NLS");
 	}
+}
+
+BYTE *eng_third_init(BYTE* _this, WORD year, cm3_club_comps* comp) 
+{
+	eng_third_init_additional();
+	sub_682200(_this);
+	comp_stats* data = (comp_stats*)_this;
+
+	BYTE playOffPlaces = 1;
+	LeagueInfo* leagueInfo = get_league_info(comp->ClubCompID);
+	if (leagueInfo)
+		playOffPlaces = leagueInfo->PlayoffPlaces;
+
+	data->competition_db = comp;
+	data->comp_vtable = (DWORD*)vtable_eng_third.vtable_ptr;
+	data->year = year;
+	data->min_stadium_capacity = 4000;
+	data->min_stadium_seats = 500;
+	data->rules = 0x9;
+	int loaded = sub_687B10(_this, 1);
+	if (loaded) 
+		return _this;
+	data->f68 = -1;
+	data->current_stage = -1;
+	data->num_stages = (playOffPlaces == 0) ? 0 : 1;
+	data->stages = (DWORD*)sub_944E46_malloc(data->num_stages * 4);
+	sub_5780C0_set_subs_c(_this);
+	AddTeams(_this);
+	sub_6835C0(_this);
+	BYTE* ebx = 0;
+	sub_6827D0(_this, ebx);
+	BYTE* pMem2 = (BYTE*)sub_944CF1_operator_new(0x5CE);
+	BYTE unk1 = 1;
+	sub_49EE70(pMem2, _this);
+	unk1 = 0;
+	data->f8 = (DWORD*)pMem2;
+	sub_68A850(_this);
+	return _this;
 }
 
 void __declspec(naked) sub_576DD0_eng_third_init()
@@ -486,6 +510,22 @@ _00576FE3:
 	}
 }
 
+void __declspec(naked) eng_third_init_c()		// used as a __thiscall -> __cdecl converter
+{
+	__asm
+	{
+		//jmp sub_576DD0_eng_third_init
+
+		mov eax, esp
+		push dword ptr[eax + 0x8]
+		push dword ptr[eax + 0x4]
+		push ecx
+		call eng_third_init
+		add esp, 0xc
+		ret 8
+	}
+}
+
 void __declspec(naked) sub_577000()			// Not sure when called, if ever?
 {
 	__asm
@@ -582,7 +622,7 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 {
 	BYTE* comp = (BYTE*)*(DWORD*)(_this + 4);
 	DWORD CompID = *(DWORD*)(comp);
-	dprintf("sub_5780C0_set_subs_c - CompID: %08X\n", CompID);
+	dprintf("sub_5780C0_set_subs_c - CompID: %08X this: %08X\n", CompID, _this);
 
 	*(WORD*)(_this + 0x3C) = 2;		// Playoff related? (2)
 	_this[0xC2] = 3;
@@ -603,6 +643,20 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 	//bool includingConference = ((*(BYTE*)(*(DWORD*)(*((DWORD*)_this + 1) + 93) + 284) & 4) != 0);
 	cm3_nations *nation = (cm3_nations*)*(DWORD*)(comp + 0x5D);
 	bool includingConference = ((nation->NationLeagueSelected & 4) == 4);		// Normally either 2 (no conf) or 6 (conf)
+
+	LeagueInfo *leagueInfo = get_league_info(CompID);
+
+	if (leagueInfo)
+	{
+		dprintf("Generic League Setup - %s (Promo: %08X Rele: %08X)\n", leagueInfo->Name, leagueInfo->PromotionComp, leagueInfo->RelegationComp);
+		_this[0xBE] = leagueInfo->PromotionPlaces;
+		_this[0xBF] = leagueInfo->PlayoffPlaces;
+		_this[0xC0] = leagueInfo->RelegationPlayOffPlaces;
+		_this[0xC1] = leagueInfo->RelegationPlaces;
+
+		*(DWORD*)(_this + 0x1C) = leagueInfo->PromotionComp ? leagueInfo->PromotionComp->ClubCompID : -1L;
+		*(DWORD*)(_this + 0x20) = leagueInfo->RelegationComp ? leagueInfo->RelegationComp->ClubCompID : -1L;
+	}
 
 	if (CompID == ThirdDivisionCompID)
 	{
@@ -705,9 +759,21 @@ void __declspec(naked) sub_conference_subs_56EDE0()
 	/*0056EE71*/	ret
 	}
 }
+void PrePlus8Function(comp* comp_ptr)
+{
+	dprintf("sub_578170 (+8 Function) - CompID: %08X %s\n", comp_ptr->competition_db->ClubCompID, comp_ptr->competition_db->ClubCompName);
+}
 
 void __declspec(naked) sub_578170()		// 0x8 in vtable
 {
+	__asm 
+	{
+		pushad
+		push ecx
+		call PrePlus8Function
+		add esp, 4
+		popad
+	}
 	__asm
 	{
 	/*00578170*/	sub esp,0x200

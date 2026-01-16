@@ -70,7 +70,7 @@ DWORD GenericSetup(BYTE* nation_data)
 	for (size_t i = 0; i < nation_league_info->leagues.size(); i++)
 	{
 		LeagueInfo league = nation_league_info->leagues[i];
-		AddLeague(nation_data, league.CompID, compNo++, *current_year, league.SetupFunction);
+		AddLeague(nation_data, league.Comp->ClubCompID, compNo++, *current_year, league.SetupFunction);
 	}
 
 	Date startDate(*current_year, 6, 20);
@@ -80,7 +80,6 @@ DWORD GenericSetup(BYTE* nation_data)
 	*(BYTE*)(nation_data + 0x1D) = 1;
 	return 1;
 }
-
 
 /*
 0. 00B63D60 00000000  (Setup Func: 00830620)
@@ -122,6 +121,7 @@ DWORD GenericSetup(BYTE* nation_data)
 
 DWORD OriginalNumberOfNations = 0x23;
 DWORD TotalNumberOfConsideredNations = 0x23;
+BYTE* original_table_ptr = (BYTE*)0xB63D60;
 BYTE* nation_table_ptr = (BYTE*)0xB63D60;  // Playable Leagues - 72 byte blocks. First 8 are reserved. 0 = World Cup
 BYTE* our_nation_table_ptr;
 BYTE* our_sorted_idx_B63D38;
@@ -131,10 +131,17 @@ void AddNation(const char *szNation, DWORD NationSetupFunction)
 {
 	cm3_nations *country = find_country(szNation);
 
-	// Copy first country as a template
-	memcpy(nation_table_ptr + (TotalNumberOfConsideredNations * 72), nation_table_ptr + (8 * 72), 72);
+	// Copy a country as a template
+	DWORD country_to_copy = 8; // 29; // South Korea
+
+	memcpy(nation_table_ptr + (TotalNumberOfConsideredNations * 72), nation_table_ptr + (country_to_copy * 72), 72);
 	*(DWORD*)(nation_table_ptr + (TotalNumberOfConsideredNations * 72)) = (DWORD)country;
 	*(DWORD*)(nation_table_ptr + (TotalNumberOfConsideredNations * 72) + 8) = (DWORD)NationSetupFunction;
+
+	// 0x1E is a cup
+	*(DWORD*)(nation_table_ptr + (TotalNumberOfConsideredNations * 72) + 0x1E) = 0; // No Cup Competition
+
+	dprintf("Copied nation as a template: %08X to %08X (%s)\n", original_table_ptr + (country_to_copy * 72), nation_table_ptr + (TotalNumberOfConsideredNations * 72), szNation);
 
 	TotalNumberOfConsideredNations++;
 }
