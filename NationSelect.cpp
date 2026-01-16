@@ -6,6 +6,7 @@
 #include "Helper.h"
 #include "generic_functions.h"
 #include "Date.h"
+#include "LeagueInfo.h"
 #include <deque>
 
 static int(*sub_7A1710)() = (int(*)())(0x7A1710);
@@ -46,7 +47,7 @@ void sub_66A100();
 
 void sub_576DD0_eng_third_init();
 
-DWORD eng_setup_c(BYTE* nation_data) 
+DWORD GenericSetup(BYTE* nation_data) 
 {
 	BYTE compNo = 0;
 	cm3_nations *nation = (cm3_nations*)*(DWORD*)(nation_data);
@@ -62,91 +63,14 @@ DWORD eng_setup_c(BYTE* nation_data)
 	*(WORD*)(nation_data + 0x44) = *current_year + 1;
 	*(DWORD*)(nation_data + 0x26) = 0;		// Cup Comp
 
-	if (_stricmp(nation->NationName, "Austria") == 0)
+	NationLeagueInfo *nation_league_info = get_nation_league_info(nation->NationName);
+
+	*numberOfComps = nation_league_info->leagues.size();
+	*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
+	for (size_t i = 0; i < nation_league_info->leagues.size(); i++)
 	{
-		*numberOfComps = 2;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Austrian Premier Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Austrian First Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "Czech Republic") == 0)
-	{
-		*numberOfComps = 4;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Czech First Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Czech Second Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Czech Third Division CFL")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Czech Third Division MSFL")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "Hong Kong") == 0)
-	{
-		*numberOfComps = 4;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Hong Kong First Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Hong Kong Second Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Hong Kong Third Division A")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Hong Kong Third Division B")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "China PR") == 0)
-	{
-		*numberOfComps = 3;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Chinese First Division A")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Chinese First Division B")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Chinese Second Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "Luxembourg") == 0)
-	{
-		*numberOfComps = 2;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Luxembourg National Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-
-		// Luxembourg Second Division is spelt wrong in the original data
-		if (find_club_comp("Luxembourg Second Dvision") != NULL)
-			strcpy(find_club_comp("Luxembourg Second Dvision")->ClubCompName, "Luxembourg Second Division");
-
-		AddLeague(nation_data, find_club_comp("Luxembourg Second Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "Malaysia") == 0)
-	{
-		*numberOfComps = 2;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Malaysian League Premier One")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Malaysian League Premier Two")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "Mexico") == 0)
-	{
-		*numberOfComps = 3;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Mexican First Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Mexican First Division A")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Mexican Second Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "South Africa") == 0)
-	{
-		*numberOfComps = 3;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("South African Premier Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("South African First Division Inland")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("South African First Division Coastal")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-	}
-
-	if (_stricmp(nation->NationName, "Yugoslavia") == 0)
-	{
-		*numberOfComps = 5;
-		*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-		AddLeague(nation_data, find_club_comp("Yugoslav First Division")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Yugoslav Second Division East")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Yugoslav Second Division North")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Yugoslav Second Division South")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
-		AddLeague(nation_data, find_club_comp("Yugoslav Second Division West")->ClubCompID, compNo++, *current_year, (DWORD)&sub_576DD0_eng_third_init);
+		LeagueInfo league = nation_league_info->leagues[i];
+		AddLeague(nation_data, league.CompID, compNo++, *current_year, league.SetupFunction);
 	}
 
 	Date startDate(*current_year, 6, 20);
@@ -236,16 +160,17 @@ void ModifyLeagues()
 		}
 	}
 
+	SetupNationLeagueInfo();
 
-	AddNation("Austria", (DWORD)&eng_setup_c);
-	AddNation("Czech Republic", (DWORD)&eng_setup_c);
-	AddNation("Hong Kong", (DWORD)&eng_setup_c);
-	AddNation("China PR", (DWORD)&eng_setup_c);
-	AddNation("Luxembourg", (DWORD)&eng_setup_c);
-	AddNation("Malaysia", (DWORD)&eng_setup_c);
-	AddNation("Mexico", (DWORD)&eng_setup_c);
-	AddNation("South Africa", (DWORD)&eng_setup_c);
-	AddNation("Yugoslavia", (DWORD)&eng_setup_c);
+	AddNation("Austria", (DWORD)&GenericSetup);
+	AddNation("Czech Republic", (DWORD)&GenericSetup);
+	AddNation("Hong Kong", (DWORD)&GenericSetup);
+	AddNation("China PR", (DWORD)&GenericSetup);
+	AddNation("Luxembourg", (DWORD)&GenericSetup);
+	AddNation("Malaysia", (DWORD)&GenericSetup);
+	AddNation("Mexico", (DWORD)&GenericSetup);
+	AddNation("South Africa", (DWORD)&GenericSetup);
+	AddNation("Yugoslavia", (DWORD)&GenericSetup);
 
 	// Hack to get around replacing aus, a key nation, with a euro nation that does not have a cup and can't feed the uefa_seeding (?)
 	WriteBytes(0x904819, 11, 0xE9, 0x0A, 0x03, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90);

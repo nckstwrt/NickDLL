@@ -60,6 +60,9 @@
     <ClCompile Include="eng_prm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LeagueInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aus_nsl.h">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="eng_prm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LeagueInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
