@@ -65,9 +65,9 @@ DWORD GenericSetup(BYTE* nation_data)
 
 	NationLeagueInfo *nation_league_info = get_nation_league_info(nation->NationName);
 
-	*numberOfComps = nation_league_info->leagues.size();
+	*numberOfComps = nation_league_info->GetPlayableLeagues();
 	*(DWORD*)(nation_data + 0x10) = (DWORD)sub_944E46_malloc(*numberOfComps * 4);		// Allocate memory for comps
-	for (size_t i = 0; i < nation_league_info->leagues.size(); i++)
+	for (size_t i = 0; i < *numberOfComps; i++)
 	{
 		LeagueInfo league = nation_league_info->leagues[i];
 		AddLeague(nation_data, league.Comp->ClubCompID, compNo++, *current_year, league.SetupFunction);

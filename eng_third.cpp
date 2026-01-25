@@ -111,7 +111,7 @@ eng_prm.cpp VTable at 00969D1C:
 // B0 = Could this be the relegation one?
 
 // Normally at: 0x969E84
-vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, /*+28*/ (DWORD)&sub_578330_c, 0x684640, (DWORD)&eng_fixture_caller, /*+44*/ (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, -1L /*(DWORD)&sub_689C20_relegation_hook*/, 0x5788C0, 0x579610);
+vtable vtable_eng_third((DWORD)&sub_577000, (DWORD)&sub_578170, /*+28*/ (DWORD)&sub_578330_c, 0x684640, (DWORD)&eng_fixture_caller, /*+44*/ (DWORD)&sub_576C50, (DWORD)&sub_5785B0, 0x48E180, (DWORD)&sub_578660, 0x48F2D0, (DWORD)&sub_5780C0_set_subs_c, (DWORD)&PromotionRelegateCaller/*-1L*/ /*(DWORD)&sub_689C20_relegation_hook*/, 0x5788C0, 0x579610);
 
 void __declspec(naked) sub_576C50()	//+44
 {
@@ -655,7 +655,14 @@ int __fastcall sub_5780C0_set_subs_c(BYTE* _this)				// 0x8C
 		_this[0xC1] = leagueInfo->RelegationPlaces;
 
 		*(DWORD*)(_this + 0x1C) = leagueInfo->PromotionComp ? leagueInfo->PromotionComp->ClubCompID : -1L;
-		*(DWORD*)(_this + 0x20) = leagueInfo->RelegationComp ? leagueInfo->RelegationComp->ClubCompID : -1L;
+		*(DWORD*)(_this + 0x20) = -1L;
+
+		if (leagueInfo->RelegationComp)	// Have to check it's a real league and now a Lower Division without a setup function
+		{
+			LeagueInfo* releagedLeagueInfo = get_league_info(leagueInfo->RelegationComp->ClubCompID);
+			if (releagedLeagueInfo->SetupFunction)
+				*(DWORD*)(_this + 0x20) = leagueInfo->RelegationComp->ClubCompID;
+		}
 	}
 
 	if (CompID == ThirdDivisionCompID)
@@ -761,7 +768,8 @@ void __declspec(naked) sub_conference_subs_56EDE0()
 }
 void PrePlus8Function(comp* comp_ptr)
 {
-	dprintf("sub_578170 (+8 Function) - CompID: %08X %s\n", comp_ptr->competition_db->ClubCompID, comp_ptr->competition_db->ClubCompName);
+	dprintf("PrePlus8Function - sub_578170 (+8 Function) - CompID: %08X %s\n", comp_ptr->competition_db->ClubCompID, comp_ptr->competition_db->ClubCompName);
+	GenericPromotionRelegation((BYTE*)comp_ptr, 1);
 }
 
 void __declspec(naked) sub_578170()		// 0x8 in vtable

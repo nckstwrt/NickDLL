@@ -26,6 +26,7 @@ class NationLeagueInfo
 public:
 	NationLeagueInfo(const char* nationName);
 	void AddLeague(const char* Name, const char* AlternativeName, BYTE PromotionPlaces, BYTE PlayoffPlaces, BYTE RelegationPlayOffPlaces, BYTE RelegationPlaces, DWORD SetupFunction = 0);
+	int GetPlayableLeagues();
 
 	const char* nationName;
 	std::vector<LeagueInfo> leagues;

@@ -153,6 +153,50 @@ vector<cm3_club_comps*> find_club_comps_of_nation(const char *szNation)
 	return ret;
 }
 
+enum class LeaguePos : BYTE
+{
+	Neutral = 0xFF,
+	Champions = 5,
+	Promoted = 0,
+	Playoff1 = 1,
+	Playoff2 = 2,
+	Relegated = 3
+};
+
+std::vector<cm3_clubs*> get_relegated_teams(DWORD compID)
+{
+	std::vector<cm3_clubs*> relegated_clubs;
+	BYTE* league = get_loaded_league(compID);
+
+	if (league)
+	{
+		BYTE numberOfTeams = league[0x3E];
+		BYTE* teams = (BYTE*)*(DWORD*)(league + 0xB1);
+
+		for (int i = 0; i < numberOfTeams; i++)
+		{
+			DWORD* clubPtr = (DWORD*)(teams + (i * 0x3B));
+			cm3_clubs* club = (cm3_clubs*)*clubPtr;
+			BYTE pos = teams[i * 0x3B + 4];
+			BYTE status = teams[i * 0x3B + 0x37];
+			if (club)
+			{
+				dprintf("club: %d. %s %d %d\n", i, club->ClubName, pos, status);
+				/*
+				for (int j = 0; j < 0x3B; j++)
+					dprintf("%02X ", *(teams + (i * 0x3B) + j));
+				dprintf("\n");
+				*/
+				if (status == (BYTE)LeaguePos::Relegated)
+					relegated_clubs.push_back(club);
+			}
+		}
+	}
+	else
+		dprintf("Can't find relegated clubs at compID: %08X\n", compID);
+	return relegated_clubs;
+}
+
 vector<cm3_clubs*> find_clubs_of_country(DWORD nation_id)
 {
 	vector<cm3_clubs*> ret;

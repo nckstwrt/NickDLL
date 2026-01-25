@@ -23,6 +23,7 @@ cm3_club_comps* get_comp(DWORD compID);
 cm3_club_comps* find_club_comp(const char *szClubComp, const char* szClubCompAlternative = NULL);
 DWORD find_club_comp_id(const char* szClubComp, const char* szClubCompAlternative = NULL);
 vector<cm3_club_comps*> find_club_comps_of_nation(const char *szNation);
+std::vector<cm3_clubs*> get_relegated_teams(DWORD compID);
 
 vector<cm3_clubs*> find_clubs_of_country(DWORD nation_id);
 bool vector_contains_club(vector<cm3_clubs*> &vec, cm3_clubs* club);

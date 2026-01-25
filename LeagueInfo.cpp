@@ -38,6 +38,15 @@ void NationLeagueInfo::AddLeague(const char* Name, const char* AlternativeName, 
 	leagues.push_back(league_info);
 }
 
+int NationLeagueInfo::GetPlayableLeagues()
+{
+	int playableLeagues = 0;
+	for (size_t i = 0; i < leagues.size(); i++)
+		if (leagues[i].SetupFunction != 0)
+			playableLeagues++;
+	return playableLeagues;
+}
+
 NationLeagueInfo* add_nation_league_info(const char* nationName)
 {
 	nationLeagues.push_back(NationLeagueInfo(nationName));
@@ -71,6 +80,7 @@ void SetupNationLeagueInfo()
 	NationLeagueInfo* austria = add_nation_league_info("Austria");
 	austria->AddLeague("Austrian Premier Division", NULL, 1, 0, 0, 2, (DWORD)&eng_third_init_c);
 	austria->AddLeague("Austrian First Division", NULL, 2, 0, 0, 2, (DWORD)&eng_third_init_c);
+	austria->AddLeague("Austrian Lower Division", NULL, 0, 0, 0, 0, NULL);
 
 	NationLeagueInfo* czech_republic = add_nation_league_info("Czech Republic");
 	czech_republic->AddLeague("Czech First Division", NULL, 1, 0, 0, 2, (DWORD)&eng_third_init_c);

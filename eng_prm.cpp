@@ -8,6 +8,24 @@
 #include "vtable.h"
 #include "generic_functions.h"
 
+/*
+eng_prm.cpp VTable at 00969D1C:
+0. 00 = 005735B0
+1. 08 = 00574C10
+2. 28 = 005A8F60
+3. 30 = 00684640
+4. 3C = 00573660
+5. 44 = 00686940
+6. 48 = 0048C6D0
+7. 50 = 0048E180
+8. 68 = 0048E380
+9. 7C = 0048F2D0
+10. 8C = 00574B70
+11. B0 = 005752E0
+12. B4 = 005756C0
+13. B8 = 00685D30
+*/
+
 static int(*sub_4AFBD0)() = (int(*)())(0x4AFBD0);
 static int(*sub_5E8290)() = (int(*)())(0x5E8290);
 static int(*sub_6826D0)() = (int(*)())(0x6826D0);
@@ -32,50 +50,6 @@ static int(*sub_6835C0)() = (int(*)())(0x6835C0);
 static int(*sub_6827D0)() = (int(*)())(0x6827D0);
 static int(*sub_68AA80)() = (int(*)())(0x68AA80);
 static int(*sub_79CEE0)() = (int(*)())(0x79CEE0);
-
-enum class LeaguePos : BYTE
-{
-	Neutral = 0xFF,
-	Champions = 5,
-	Promoted = 0,
-	Playoff1 = 1,
-	Playoff2 = 2,
-	Relegated = 3
-};
-
-std::vector<cm3_clubs*> get_relegated_teams(DWORD compID)
-{
-	std::vector<cm3_clubs*> relegated_clubs;
-	BYTE* league = get_loaded_league(compID);
-
-	if (league)
-	{
-		BYTE numberOfTeams = league[0x3E];
-		BYTE* teams = (BYTE*)*(DWORD*)(league + 0xB1);
-
-		for (int i = 0; i < numberOfTeams; i++)
-		{
-			DWORD* clubPtr = (DWORD*)(teams + (i * 0x3B));
-			cm3_clubs* club = (cm3_clubs*)*clubPtr;
-			BYTE pos = teams[i * 0x3B + 4];
-			BYTE status = teams[i * 0x3B + 0x37];
-			if (club)
-			{
-				dprintf("club: %d. %s %d %d\n", i, club->ClubName, pos, status);
-				/*
-				for (int j = 0; j < 0x3B; j++)
-					dprintf("%02X ", *(teams + (i * 0x3B) + j));
-				dprintf("\n");
-				*/
-				if (status == (BYTE)LeaguePos::Relegated)
-					relegated_clubs.push_back(club);
-			}
-		}
-	}
-	else
-		dprintf("Can't find relegated clubs at compID: %08X\n", compID);
-	return relegated_clubs;
-}
 
 void __fastcall sub_5750A0_promote_teams_to_bottom_league_c(BYTE *_this)
 {
@@ -354,7 +328,46 @@ _00574E38:
 	}
 }
 
-void __declspec(naked) sub_5752E0_eng_prm_promo()
+void eng_prm_prom_rel_update(BYTE* _this, int a2) 
+{
+	DWORD v1 = *(DWORD*)_this;
+	(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(_this);
+
+	BYTE* eng_first = get_loaded_league(Get9CF(0x9CF5C0));
+	v1 = *(DWORD*)eng_first;
+	(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(eng_first);
+
+	BYTE* eng_second = get_loaded_league(Get9CF(0x9CF5C4));
+	v1 = *(DWORD*)eng_second;
+	(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(eng_second);
+
+	BYTE* eng_third = get_loaded_league(Get9CF(0x9CF5C8));
+	v1 = *(DWORD*)eng_third;
+	(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(eng_third);
+
+	sub_689C80_promote(_this, _this, eng_first, 1, a2, -1, -1);
+	sub_689C80_promote(_this, eng_first, eng_second, 1, a2, -1, -1);
+	sub_689C80_promote(_this, eng_second, eng_third, 1, a2, -1, -1);
+
+	BYTE* eng_conf = get_loaded_league(Get9CF(0x9CF69C));
+	if (eng_conf) {
+		v1 = *(DWORD*)eng_conf;
+		(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(eng_conf);
+		BYTE* eng_conf_n = get_loaded_league(0x168);
+		v1 = *(DWORD*)eng_conf_n;
+		(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(eng_conf_n);
+		BYTE* eng_conf_s = get_loaded_league(0x167);
+		v1 = *(DWORD*)eng_conf_s;
+		(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(eng_conf_s);
+
+		// To do: stadium capacity validations
+		sub_689C80_promote(_this, eng_third, eng_conf, 1, a2, -1, -1);
+		sub_689C80_promote(_this, eng_conf, eng_conf_n, 1, a2, -1, -1);
+		sub_689C80_promote(_this, eng_conf, eng_conf_s, 1, a2, -1, -1);
+	}
+}
+
+void __declspec(naked) sub_5752E0_eng_prm_promo()			// +B0 Func
 {
 	__asm
 	{

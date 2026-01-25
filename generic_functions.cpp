@@ -3,6 +3,7 @@
 #include "CMHeader.h"
 #include "Helper.h"
 #include "Date.h"
+#include "LeagueInfo.h"
 
 DWORD SecondDivisionCompID;
 DWORD ThirdDivisionCompID;
@@ -663,4 +664,152 @@ int __fastcall HandlePlayoffSelection(BYTE *_this)
   sub_9452CA_free(pMem);	// Mem Free
   sub_9452CA_free(v5);	// Mem Free
   return sub_51C800_call((BYTE*)v6, 0);
+}
+
+void __declspec(naked) PromotionRelegateCaller()		// used as a __thiscall -> __cdecl converter (by +B0)
+{
+	__asm
+	{
+		mov eax, esp
+		push dword ptr[eax + 0x4]
+		push ecx
+		call GenericPromotionRelegation
+		add esp, 0x8
+		ret 4
+	}
+}
+
+void GenericPromotionRelegation(BYTE* _this, int a2)
+{
+	comp_stats *comp = (comp_stats*)_this;
+	dprintf("GenericPromotionRelegation called with this=%08X a2=%d CompID=%X\n", _this, a2, comp->competition_db->ClubCompID);
+	LeagueInfo *leagueInfo = get_league_info(comp->competition_db->ClubCompID);
+	if (leagueInfo)
+	{
+		if (leagueInfo->PromotionComp == NULL && leagueInfo->RelegationComp != NULL)		// If it's the top most league in the country, no promotion function
+		{
+			// Call this league's +A4
+			cm3_club_comps *compPtr = comp->competition_db;
+
+			// Call +A4 on all subsequent leagues
+			while (true)
+			{
+				BYTE* loaded_league = get_loaded_league(compPtr->ClubCompID);
+				if (loaded_league)
+				{
+					DWORD v1 = *(DWORD*)loaded_league;
+
+					dprintf("Calling +A4 of league %s (CompID=%X v1=%08X loaded_league=%08X)\n", leagueInfo->Name, compPtr->ClubCompID, v1, loaded_league);
+					(*(int(__thiscall**)(BYTE*))(v1 + 0xA4))(loaded_league);
+
+					compPtr = leagueInfo->RelegationComp;
+					leagueInfo = compPtr ? get_league_info(compPtr->ClubCompID) : NULL;
+
+					dprintf("Next league to call +A4 of: %s (compPtr: %08X)\n", leagueInfo ? leagueInfo->Name : "NULL", (DWORD)compPtr);
+					if (compPtr == NULL || leagueInfo == NULL || leagueInfo->SetupFunction == 0)
+						break;
+				}
+				else
+					break;
+			}
+
+			// Now loop through and call the relegation function on the leagues
+			compPtr = comp->competition_db;
+			leagueInfo = get_league_info(comp->competition_db->ClubCompID);
+			if (leagueInfo->RelegationComp)
+			{
+				while (true)
+				{
+					LeagueInfo* relegatedLeagueInfo = get_league_info(leagueInfo->RelegationComp->ClubCompID);
+					if (relegatedLeagueInfo->SetupFunction == NULL)
+					{
+						dprintf("Relegation league %s is not playable (SetupFunction == NULL). Skipping promotion call.\n", relegatedLeagueInfo->Name);
+						leagueInfo = relegatedLeagueInfo;
+						break;
+					}
+					dprintf("Calling sub_689C80_promote between %s <-> %s\n", leagueInfo->Name, leagueInfo->RelegationComp ? get_league_info(leagueInfo->RelegationComp->ClubCompID)->Name : "NULL");
+					sub_689C80_promote(_this, get_loaded_league(compPtr->ClubCompID), get_loaded_league(leagueInfo->RelegationComp->ClubCompID), 1, a2, -1, -1);
+					compPtr = leagueInfo->RelegationComp;
+					leagueInfo = compPtr ? get_league_info(compPtr->ClubCompID) : NULL;
+					if (compPtr == NULL || leagueInfo == NULL || leagueInfo->RelegationComp == NULL)
+						break;
+				}
+			}
+
+			// LeagueInfo should be the bottom league now and sould not be playable (i.e. SetupFunction == NULL)
+			if (leagueInfo->PromotionComp && leagueInfo->RelegationComp == NULL)
+			{
+				LeagueInfo* promotionLeagueInfo = get_league_info(leagueInfo->PromotionComp->ClubCompID);
+
+				// Need to do the relegation for the bottom league with the lower divisions
+				dprintf("Getting relegated teams for bottom real league %s\n", promotionLeagueInfo->Name);
+				std::vector<cm3_clubs*> relegated_clubs = get_relegated_teams(promotionLeagueInfo->Comp->ClubCompID);
+				std::vector<cm3_clubs*> available_clubs;
+				
+				for (int i = 0; i < get_club_count(); i++)
+				{
+					cm3_clubs* club = get_club(i);
+					if (club)
+					{
+						if (club->ClubDivision && club->ClubNation)
+						{
+							DWORD compID = club->ClubDivision->ClubCompID;
+							DWORD nationID = club->ClubNation->NationID;
+							if (compID == leagueInfo->Comp->ClubCompID && nationID == leagueInfo->Comp->ClubCompNation->NationID)
+							{
+								available_clubs.push_back(club);
+							}
+						}
+					}
+				}
+
+				dprintf("Bottom league relegation: Relegated Clubs: %d Available Clubs: %d\n", relegated_clubs.size(), available_clubs.size());
+
+				for (unsigned int i = 0; i < relegated_clubs.size(); i++)
+				{
+					int availableIdx = rand() % available_clubs.size();
+					cm3_clubs* clubToRelegate = relegated_clubs[i];
+					cm3_clubs* available = available_clubs[availableIdx];
+
+					dprintf("Swapping Teams: %s (%s) <-> %s (%s)\n", clubToRelegate->ClubName, clubToRelegate->ClubDivision->ClubCompName, available->ClubName, available->ClubDivision->ClubCompName);
+
+					cm3_club_comps* tempDivision = available->ClubDivision;
+					available->ClubDivision = clubToRelegate->ClubDivision;
+					clubToRelegate->ClubDivision = tempDivision;
+
+					available_clubs.erase(available_clubs.begin() + availableIdx);
+				}
+			}
+
+			// The lower teams won't have had their +8 function called. So we have to call them manually here.
+			compPtr = comp->competition_db;
+			leagueInfo = get_league_info(comp->competition_db->ClubCompID);
+			if (leagueInfo->RelegationComp)
+			{
+				while (true)
+				{
+					compPtr = leagueInfo->RelegationComp;
+					leagueInfo = compPtr ? get_league_info(compPtr->ClubCompID) : leagueInfo;
+					if (compPtr == NULL)
+						break;
+
+					if (leagueInfo->SetupFunction == NULL)
+					{
+						dprintf("Relegation league %s is not playable (SetupFunction == NULL). Skipping +8 call.\n", leagueInfo->Name);
+						break;
+					}
+
+					BYTE* loaded_league = get_loaded_league(compPtr->ClubCompID);
+					DWORD v1 = *(DWORD*)loaded_league;
+
+					dprintf("Calling +8 of league %s (CompID=%X v1=%08X loaded_league=%08X)\n", leagueInfo->Name, compPtr->ClubCompID, v1, loaded_league);
+					(*(int(__thiscall**)(BYTE*))(v1 + 0x8))(loaded_league);
+				}
+			}
+		}
+		else
+		{
+			dprintf("No relegation function defined for league %s\n", leagueInfo->Name);
+		}
+	}
 }

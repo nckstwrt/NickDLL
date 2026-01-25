@@ -19,6 +19,7 @@ static void* (*sub_945501_alloc)(int size, int a2) = (void* (*)(int size, int a2
 static int   (*sub_5E8290_message_box_call)(LPCSTR lpCaption, CHAR* lpText, int type) = (int(*)(LPCSTR lpCaption, CHAR *lpText, int type))(0x5E8290);
 
 static int(__thiscall* sub_687430_add_team_call)(BYTE* _this, BYTE teamNo, cm3_clubs* club, BYTE a3, DWORD* a4) = (int(__thiscall*)(BYTE * _this, BYTE teamNo, cm3_clubs * club, BYTE a3, DWORD * a4))(0x687430);
+static void(__thiscall* sub_689C80_promote)(BYTE* _this, BYTE* top, BYTE* btm, int a3, int a4, char a5, char a6) = (void(__thiscall*)(BYTE * _this, BYTE * top, BYTE * btm, int a3, int a4, char a5, char a6))(0x689C80);
 
 extern DWORD SecondDivisionCompID;
 extern DWORD ThirdDivisionCompID;
@@ -34,3 +35,5 @@ DWORD GenericAddTeamFixtures(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5
 DWORD AddEng24TeamFixturesWithPlayoffs(BYTE* _this, BYTE a2, WORD* a3, WORD* a4, DWORD* a5);
 void sub_689C20_relegation_hook();
 int __fastcall HandlePlayoffSelection(BYTE* _this);
+void PromotionRelegateCaller();
+void GenericPromotionRelegation(BYTE* _this, int a2);
